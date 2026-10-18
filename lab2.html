@@ -186,8 +186,52 @@
       <!-- Consejo que aparece si alguna medición se aleja mucho de la teórica -->
       <div id="aviso-mediciones" class="aviso" hidden>
         <strong>Alguna medición se aleja más de 10&nbsp;% de la teórica.</strong>
-        Revisa que el amperímetro esté en serie con la rama correcta, que el voltímetro esté
-        en paralelo con el resistor, la escala del multímetro y las unidades (mA o V).
+        Posible causa:
+        <!-- Aquí js/diagnostico.js escribe una sugerencia por cada fila en rojo -->
+        <ul id="diagnostico" class="diagnostico"></ul>
+      </div>
+
+      <!-- Guía de errores comunes: cada pregunta se abre al tocarla -->
+      <div class="errores-comunes">
+        <p class="tabla-titulo">¿Algo no cuadra? Errores comunes</p>
+        <details>
+          <summary>El amperímetro marca 0 o no marca nada</summary>
+          <p>Para medir una corriente hay que abrir la rama e insertar el amperímetro en serie. Si marca 0,
+             la rama quedó abierta (un cable suelto o mal puesto en la protoboard) o el fusible del
+             amperímetro se quemó por conectarlo en paralelo.</p>
+        </details>
+        <details>
+          <summary>Después de medir una corriente, el circuito ya no funciona igual</summary>
+          <p>Al quitar el amperímetro hay que volver a cerrar la rama con un cable. Revisa que todas las
+             ramas estén cerradas antes de medir lo siguiente.</p>
+        </details>
+        <details>
+          <summary>Una lectura sale negativa</summary>
+          <p>Las puntas están al revés respecto al sentido de referencia del esquema. Para corrientes, la
+             punta roja va por donde entra la flecha; para voltajes, en el lado de mayor potencial.</p>
+        </details>
+        <details>
+          <summary>I<sub>2</sub> + I<sub>3</sub> no da I<sub>1</sub></summary>
+          <p>Revisa que mediste cada corriente en su rama (I<sub>2</sub> por R<sub>2</sub>, I<sub>3</sub> por
+             R<sub>3</sub> y R<sub>4</sub>) y con el mismo sentido de referencia. Una corriente medida al revés
+             cambia de signo y la suma no cuadra.</p>
+        </details>
+        <details>
+          <summary>Los voltajes de una malla no suman lo que deberían</summary>
+          <p>Recorre la malla siempre en el mismo sentido y mide cada resistor con la misma orientación de las
+             puntas. Confirma también el voltaje real de la fuente con el voltímetro.</p>
+        </details>
+        <details>
+          <summary>Un valor es mucho mayor o menor que el teórico</summary>
+          <p>Revisa el código de colores de cada resistor: es fácil confundir 1&nbsp;kΩ (café-negro-rojo) con
+             10&nbsp;kΩ (café-negro-naranja) o 3,3&nbsp;kΩ (naranja-naranja-rojo). Verifica también que
+             escribiste las corrientes en mA.</p>
+        </details>
+        <details>
+          <summary>El valor cambia o salta</summary>
+          <p>Hay un mal contacto: presiona los componentes en la protoboard y revisa que las puntas estén
+             firmes.</p>
+        </details>
       </div>
     </section>
 
@@ -224,5 +268,6 @@
   <script src="js/guardado.js"></script>
   <script src="js/registro.js"></script>
   <script src="js/lab2.js"></script>
+  <script src="js/diagnostico.js"></script>
 </body>
 </html>

@@ -117,8 +117,50 @@
       <!-- Consejo que aparece si alguna medición se aleja mucho de la teórica -->
       <div id="aviso-mediciones" class="aviso" hidden>
         <strong>Alguna medición se aleja más de 10&nbsp;% de la teórica.</strong>
-        Revisa que el amperímetro esté en serie, que el multímetro esté en la escala de mA
-        y que escribiste el valor en mA (por ejemplo 4,07 y no 4070).
+        Posible causa:
+        <!-- Aquí js/diagnostico.js escribe una sugerencia por cada fila en rojo -->
+        <ul id="diagnostico" class="diagnostico"></ul>
+      </div>
+
+      <!-- Guía de errores comunes: cada pregunta se abre al tocarla -->
+      <div class="errores-comunes">
+        <p class="tabla-titulo">¿Algo no cuadra? Errores comunes</p>
+        <details>
+          <summary>El multímetro marca 0 o no marca nada</summary>
+          <p>El circuito está abierto: revisa que cada cable y el resistor estén bien insertados y que
+             sus patas no queden en filas distintas de la protoboard. Confirma que la salida de la fuente
+             esté encendida. Si el amperímetro se conectó en paralelo por error, su fusible pudo quemarse.</p>
+        </details>
+        <details>
+          <summary>La lectura sale negativa</summary>
+          <p>El amperímetro está al revés. La corriente debe entrar por la punta roja, que va del lado
+             del positivo de la fuente.</p>
+        </details>
+        <details>
+          <summary>La corriente es mucho mayor que la esperada</summary>
+          <p>Lo más común es un resistor equivocado: 1&nbsp;kΩ es café-negro-rojo, mientras que café-negro-café
+             es 100&nbsp;Ω. También puede haber un corto entre filas de la protoboard.</p>
+        </details>
+        <details>
+          <summary>La corriente es menor que la esperada</summary>
+          <p>Revisa el valor del resistor y que los cables hagan buen contacto. Mide con el voltímetro el
+             voltaje real de la fuente: a veces no es el que muestra la perilla.</p>
+        </details>
+        <details>
+          <summary>El valor cambia o salta</summary>
+          <p>Hay un mal contacto: presiona los componentes en la protoboard y revisa que las puntas del
+             multímetro estén firmes.</p>
+        </details>
+        <details>
+          <summary>La fuente pita o se enciende la luz de límite (CC)</summary>
+          <p>La fuente está limitando la corriente: puede haber un cortocircuito. Apágala y revisa el montaje
+             antes de volver a encender.</p>
+        </details>
+        <details>
+          <summary>El resistor se calienta</summary>
+          <p>Está disipando demasiada potencia. Apaga la fuente y revisa la pre-verificación: baja el voltaje
+             o usa un resistor de mayor valor.</p>
+        </details>
       </div>
     </section>
 
@@ -160,5 +202,6 @@
   <script src="js/guardado.js"></script>
   <script src="js/registro.js"></script>
   <script src="js/lab1.js"></script>
+  <script src="js/diagnostico.js"></script>
 </body>
 </html>
