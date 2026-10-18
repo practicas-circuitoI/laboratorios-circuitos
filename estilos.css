@@ -1,0 +1,396 @@
+/* Diseño B: Un color por laboratorio */
+
+/* Carga la letra Figtree desde Google Fonts (necesita internet; sin internet usa Arial) */
+@import url('https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;800&display=swap');
+
+body {
+  margin: 0;
+  font-family: 'Figtree', Arial, sans-serif;
+  background: #f5f6fa;
+  color: #1d2230;
+}
+
+/* Encabezado blanco con una línea abajo */
+header {
+  background: white;
+  border-bottom: 1px solid #e3e6ef;
+  padding: 32px 20px 28px;
+}
+header h1 { text-wrap: balance; margin: 0 0 6px; font-size: 28px; font-weight: 800; }
+header p  { margin: 0; color: #5b6274; }
+
+.contenido { max-width: 760px; margin: 0 auto; }
+
+/* 2 columnas en computador, 1 en celular */
+main {
+  padding: 24px 20px;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+/* Cada tarjeta toma el color de su laboratorio */
+.tarjeta {
+  background: var(--fondo);
+  border-radius: 18px;
+  padding: 22px;
+}
+/* nth-child(1) = la primera tarjeta, nth-child(2) = la segunda, etc.
+   --color y --fondo son variables: se definen aquí y se usan más abajo */
+.tarjeta:nth-child(1) { --color: #c9600f; --fondo: #fdf0e4; }  /* Ohm: naranja */
+.tarjeta:nth-child(2) { --color: #0f7f68; --fondo: #e2f3ee; }  /* Kirchhoff: verde */
+.tarjeta:nth-child(3) { --color: #6246c9; --fondo: #eeeafb; }  /* Teoremas: morado */
+.tarjeta:nth-child(4) { --color: #1d63c4; --fondo: #e5edf9; }  /* AC: azul */
+
+/* El cuadrito con el símbolo. ::before lo dibuja sin tocar el HTML */
+.tarjeta::before {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 14px;
+  border-radius: 14px;
+  background: var(--color);
+  color: white;
+  font-size: 20px;
+  font-weight: 800;
+}
+.tarjeta:nth-child(1)::before { content: "Ω"; }
+.tarjeta:nth-child(2)::before { content: "ΣI"; }
+.tarjeta:nth-child(3)::before { content: "Vth"; font-size: 16px; }
+.tarjeta:nth-child(4)::before { content: "V~"; }
+
+.tarjeta h2 { margin: 0 0 6px; font-size: 20px; font-weight: 800; }
+.tarjeta p  { margin: 0 0 18px; color: #4a5164; }
+
+/* El botón usa el color de su tarjeta */
+.boton {
+  display: inline-block;
+  background: var(--color);
+  color: white;
+  padding: 10px 18px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+footer { text-align: center; color: #7a8194; font-size: 13px; padding: 4px 20px 32px; }
+
+/* ===================================================
+   Páginas de cada laboratorio
+   =================================================== */
+
+/* Color de cada laboratorio (se activa con la clase del <body>) */
+.lab-ohm       { --color: #c9600f; --fondo: #fdf0e4; }
+.lab-kirchhoff { --color: #0f7f68; --fondo: #e2f3ee; }
+.lab-teoremas  { --color: #6246c9; --fondo: #eeeafb; }
+.lab-ac        { --color: #1d63c4; --fondo: #e5edf9; }
+
+/* En las páginas de laboratorio, todo en una sola columna */
+.lab main { grid-template-columns: minmax(0, 1fr); }
+
+/* Enlace para volver al inicio */
+.volver {
+  display: inline-block;
+  margin-bottom: 14px;
+  color: var(--color);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* Símbolo grande junto al título */
+.encabezado-lab { display: flex; align-items: center; gap: 14px; }
+.simbolo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: var(--color);
+  color: white;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+/* Menú de secciones: se queda pegado arriba al bajar */
+.secciones {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: white;
+  border-bottom: 1px solid #e3e6ef;
+}
+.secciones .contenido {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 10px 20px;
+}
+.secciones a {
+  white-space: nowrap;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #f1f2f6;
+  color: #4a5164;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.secciones a:hover { background: var(--fondo); color: var(--color); }
+
+/* Cada sección del laboratorio */
+.seccion {
+  background: white;
+  border: 1px solid #e3e6ef;
+  border-radius: 18px;
+  padding: 22px;
+  scroll-margin-top: 70px;
+}
+.seccion h2 { margin: 0 0 10px; font-size: 20px; font-weight: 800; }
+.seccion p  { color: #4a5164; }
+.seccion ul { padding-left: 20px; color: #4a5164; }
+.seccion li { margin-bottom: 4px; }
+
+/* Recuadro de advertencia de seguridad */
+.aviso {
+  background: #fdecea;
+  color: #8a1f11;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin: 14px 0;
+}
+
+/* Espacio reservado para el video */
+.video-pendiente {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 16 / 9;
+  max-width: 100%;
+  padding: 20px;
+  border-radius: 12px;
+  background: var(--fondo);
+  color: var(--color);
+  font-weight: 600;
+  text-align: center;
+}
+.video iframe { width: 100%; aspect-ratio: 16 / 9; border: 0; border-radius: 12px; }
+
+/* Campos para escribir datos */
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+  font-weight: 600;
+}
+input {
+  box-sizing: border-box;
+  font: inherit;
+  max-width: 220px;
+  padding: 10px 12px;
+  border: 1px solid #cfd4e0;
+  border-radius: 10px;
+}
+input:focus { outline: 2px solid var(--color); border-color: transparent; }
+
+/* Para que un <button> se vea igual que los enlaces .boton */
+button.boton { border: none; font: inherit; font-weight: 600; cursor: pointer; }
+button.boton:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* Tabla de mediciones */
+.tabla-scroll { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 8px 10px; border-bottom: 1px solid #e3e6ef; text-align: left; }
+th { font-size: 14px; color: #4a5164; }
+td input { width: 100%; max-width: 130px; }
+/* ===================================================
+   Agregado con el Lab 2
+   =================================================== */
+
+/* Esquema del circuito */
+.esquema { display: block; width: 100%; max-width: 520px; height: auto; margin: 12px 0 4px; }
+.esquema text { font-size: 20px; font-weight: 600; fill: #1d2230; }
+.esquema .corriente { fill: var(--color); }
+.esquema text.corriente { font-weight: 800; }
+.esquema text.malla { font-size: 17px; font-weight: 600; fill: #7a8194; }
+
+/* Varios campos en fila (se acomodan solos en celular) */
+.campos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0 16px;
+}
+
+/* Lista de chequeo del montaje */
+.seccion .chequeo { list-style: none; padding-left: 0; }
+.chequeo label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid #eef0f4;
+  color: #1d2230;
+}
+.chequeo input,
+.opciones input {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin: 2px 0 0;
+  padding: 0;
+  accent-color: var(--color);
+}
+.pregunta { font-weight: 600; margin: 16px 0 8px; }
+.opciones { display: flex; gap: 24px; }
+.opciones label { display: flex; align-items: center; gap: 8px; }
+
+/* Evita que los subíndices (R₁, I₂) desalineen las líneas */
+sub { line-height: 0; }
+
+/* Título pequeño encima de cada tabla */
+.tabla-titulo { font-weight: 600; margin: 18px 0 4px; color: #1d2230; }
+/* ===================================================
+   Agregado con la etapa 4 (JavaScript)
+   =================================================== */
+
+/* Asegura que lo marcado como "hidden" quede oculto */
+[hidden] { display: none !important; }
+
+/* Caja de resultado de la pre-verificación */
+.resultado { margin-top: 16px; padding: 14px 16px; border-radius: 12px; }
+.resultado p  { margin: 0 0 6px; color: inherit; }
+.resultado ul { margin: 0; padding-left: 20px; color: inherit; }
+.resultado.ok         { background: #e3f1e2; color: #1f5a26; }
+.resultado.precaucion { background: #fff1db; color: #7a4a00; }
+.resultado.peligro    { background: #fdecea; color: #8a1f11; }
+
+/* Botón con aspecto de enlace ("Borrar mis datos") */
+.enlace {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: var(--color);
+  text-decoration: underline;
+  cursor: pointer;
+}
+footer p { margin: 4px 0; }
+/* ===================================================
+   Agregado con la pre-verificación del Lab 2
+   =================================================== */
+
+/* Ecuaciones de malla dentro del resultado */
+.ecuaciones {
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow-x: auto;
+  line-height: 1.8;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin: 6px 0 12px;
+}
+
+/* Tabla dentro del resultado */
+.resultado table { background: rgba(255, 255, 255, 0.6); border-radius: 8px; margin-bottom: 10px; }
+.resultado th, .resultado td {
+  padding: 6px 5px;
+  font-size: 14px;
+  color: inherit;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  font-variant-numeric: tabular-nums;
+}
+
+/* En celulares pequeños, letra un poco menor para que la tabla quepa */
+@media (max-width: 420px) {
+  .resultado th, .resultado td { font-size: 13px; }
+}
+/* ===================================================
+   Agregado con la etapa 5 (mediciones y comparación)
+   =================================================== */
+
+/* Tabla de mediciones con teórica y error */
+.tabla-mediciones th,
+.tabla-mediciones td { padding: 8px 6px; vertical-align: middle; font-variant-numeric: tabular-nums; }
+.tabla-mediciones td input { max-width: 90px; }
+.tabla-mediciones tr.alerta td { background: #fff5f4; }
+
+/* Etiqueta redonda con el error */
+.chip {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.chip.bien { background: #e3f1e2; color: #1f5a26; }
+.chip.mal  { background: #fdecea; color: #8a1f11; }
+
+/* Cuadritos con los indicadores de la comparación */
+.seccion .indicadores {
+  list-style: none;
+  padding-left: 0;
+  margin: 0 0 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+}
+.indicadores li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--fondo);
+}
+.indicadores span   { font-size: 13px; color: #4a5164; }
+.indicadores strong { font-size: 20px; color: #1d2230; font-variant-numeric: tabular-nums; }
+
+/* Gráfica V–I */
+.grafica { position: relative; height: 280px; }
+.nota { font-size: 14px; color: #6b7a8c; }
+/* ===================================================
+   Agregado con la etapa 7 (enviar resultados)
+   =================================================== */
+
+/* Mensaje que aparece después de presionar "Enviar resultados" */
+.estado-envio { margin-top: 12px; padding: 10px 14px; border-radius: 10px; font-weight: 600; }
+.estado-envio.info { background: #f1f2f6; color: #4a5164; }
+.estado-envio.bien { background: #e3f1e2; color: #1f5a26; }
+.estado-envio.mal  { background: #fdecea; color: #8a1f11; }
+
+/* El código de grupo se ve siempre en mayúsculas */
+#grupo { text-transform: uppercase; }
+/* ===================================================
+   Agregado con las mediciones y la comparación del Lab 2
+   =================================================== */
+
+/* Valor teórico debajo del nombre de cada magnitud */
+.teo { display: block; font-size: 12px; color: #6b7a8c; white-space: nowrap; }
+
+/* En el Lab 2 hay dos casillas por fila: un poco más angostas */
+.lab-kirchhoff .tabla-mediciones td input { max-width: 76px; }
+
+/* Lista con la comprobación de las leyes de Kirchhoff */
+.seccion .leyes { list-style: none; padding-left: 0; margin: 0; }
+.leyes li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid #eef0f4;
+}
+.leyes li span:first-child { font-weight: 600; color: #1d2230; flex-basis: 100%; }
+
+/* En celular, si hay un número impar de indicadores, el último ocupa toda la fila */
+@media (max-width: 600px) {
+  .indicadores li:last-child:nth-child(odd) { grid-column: 1 / -1; }
+}

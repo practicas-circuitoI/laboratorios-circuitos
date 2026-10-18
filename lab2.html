@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lab 2: Leyes de Kirchhoff · Circuitos I</title>
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<!-- "lab-kirchhoff" = usa el color verde de Kirchhoff -->
+<body class="lab lab-kirchhoff">
+
+  <header>
+    <div class="contenido">
+      <a class="volver" href="index.html">← Volver a los laboratorios</a>
+      <div class="encabezado-lab">
+        <span class="simbolo">ΣI</span>
+        <div>
+          <h1>Lab 2: Leyes de Kirchhoff</h1>
+          <p>Análisis de mallas y nodos.</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <nav class="secciones">
+    <div class="contenido">
+      <a href="#guia">1. Guía</a>
+      <a href="#video">2. Video</a>
+      <a href="#preverificacion">3. Pre-verificación</a>
+      <a href="#montaje">4. Montaje</a>
+      <a href="#mediciones">5. Mediciones</a>
+      <a href="#comparacion">6. Comparación</a>
+      <a href="#enviar">7. Enviar</a>
+    </div>
+  </nav>
+
+  <main class="contenido">
+
+    <!-- 1. GUÍA -->
+    <section id="guia" class="seccion">
+      <h2>1. Guía del laboratorio</h2>
+      <p><strong>Objetivo:</strong> verificar experimentalmente la ley de corrientes (LKC)
+         en un nodo y la ley de voltajes (LKV) en cada malla de un circuito resistivo.</p>
+
+      <p><strong>Circuito:</strong></p>
+      <!-- Dibujo del circuito hecho con SVG (formas y líneas escritas como código) -->
+      <svg class="esquema" viewBox="0 0 520 225" role="img"
+           aria-label="Circuito de dos mallas: fuente V, R1 en serie, R2 en paralelo con R3 y R4">
+        <g fill="none" stroke="#1d2230" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+          <!-- Cables -->
+          <path d="M60 95 V40 H110"/>
+          <path d="M190 40 H330"/>
+          <path d="M410 40 H460 V90"/>
+          <path d="M460 170 V210 H60 V155"/>
+          <path d="M240 40 V90"/>
+          <path d="M240 170 V210"/>
+          <!-- Resistores en zigzag: R1, R3 (horizontales) y R2, R4 (verticales) -->
+          <path d="M110 40 l5 -10 l10 20 l10 -20 l10 20 l10 -20 l10 20 l10 -20 l10 20 l5 -10"/>
+          <path d="M330 40 l5 -10 l10 20 l10 -20 l10 20 l10 -20 l10 20 l10 -20 l10 20 l5 -10"/>
+          <path d="M240 90 l-10 5 l20 10 l-20 10 l20 10 l-20 10 l20 10 l-20 10 l20 10 l-10 5"/>
+          <path d="M460 90 l-10 5 l20 10 l-20 10 l20 10 l-20 10 l20 10 l-20 10 l20 10 l-10 5"/>
+          <!-- Fuente -->
+          <circle cx="60" cy="125" r="30"/>
+        </g>
+        <!-- Signos de la fuente y nodo A -->
+        <text x="60" y="117" text-anchor="middle">+</text>
+        <text x="60" y="146" text-anchor="middle">−</text>
+        <circle cx="240" cy="40" r="5" fill="#1d2230"/>
+        <text x="240" y="24" text-anchor="middle">A</text>
+        <!-- Nombres de los elementos -->
+        <text x="4" y="132">V</text>
+        <text x="150" y="20" text-anchor="middle">R<tspan dy="4" font-size="14">1</tspan></text>
+        <text x="370" y="20" text-anchor="middle">R<tspan dy="4" font-size="14">3</tspan></text>
+        <text x="262" y="136">R<tspan dy="4" font-size="14">2</tspan></text>
+        <text x="482" y="136">R<tspan dy="4" font-size="14">4</tspan></text>
+        <!-- Corrientes: flechas y nombres -->
+        <polygon class="corriente" points="226,40 214,33 214,47"/>
+        <text class="corriente" x="198" y="68">I<tspan dy="4" font-size="14">1</tspan></text>
+        <polygon class="corriente" points="240,80 233,68 247,68"/>
+        <text class="corriente" x="252" y="74">I<tspan dy="4" font-size="14">2</tspan></text>
+        <polygon class="corriente" points="306,40 294,33 294,47"/>
+        <text class="corriente" x="292" y="68">I<tspan dy="4" font-size="14">3</tspan></text>
+        <!-- Mallas -->
+        <text class="malla" x="150" y="135" text-anchor="middle">↻ Malla 1</text>
+        <text class="malla" x="365" y="135" text-anchor="middle">↻ Malla 2</text>
+      </svg>
+
+      <p><strong>Materiales:</strong></p>
+      <ul>
+        <li>Fuente DC variable, ajustada a 10&nbsp;V</li>
+        <li>Resistores de 1/4 W: R<sub>1</sub> = 1&nbsp;kΩ, R<sub>2</sub> = 2,2&nbsp;kΩ,
+            R<sub>3</sub> = 1&nbsp;kΩ, R<sub>4</sub> = 3,3&nbsp;kΩ</li>
+        <li>Multímetro digital</li>
+        <li>Protoboard y cables</li>
+      </ul>
+      <div class="aviso">
+        <strong>Seguridad:</strong> mide la corriente con el amperímetro <strong>en serie</strong>.
+        Si lo conectas en paralelo con la fuente o con un resistor, haces un cortocircuito
+        y puedes quemar el fusible del multímetro.
+      </div>
+      <a class="boton" href="docs/guia-lab2.pdf" target="_blank">Abrir guía completa (PDF)</a>
+    </section>
+
+    <!-- 2. VIDEO -->
+    <section id="video" class="seccion video">
+      <h2>2. Video de montaje</h2>
+      <div class="video-pendiente">Aquí irá el video de montaje del circuito.</div>
+      <!-- Cuando tengas el video en YouTube, borra el bloque de arriba y usa este:
+      <iframe src="https://www.youtube.com/embed/ID_DEL_VIDEO"
+              title="Montaje del Lab 2" allowfullscreen></iframe>
+      -->
+    </section>
+
+    <!-- 3. PRE-VERIFICACIÓN -->
+    <section id="preverificacion" class="seccion">
+      <h2>3. Pre-verificación</h2>
+      <p>Escribe los valores de tu montaje. La página resolverá las ecuaciones de malla
+         y te mostrará la corriente, el voltaje y la potencia esperados en cada resistor.</p>
+      <div class="campos">
+        <label class="campo"><span>V (V)</span>
+          <input type="text" inputmode="decimal" id="v" placeholder="Ej: 10">
+        </label>
+        <label class="campo"><span>R<sub>1</sub> (Ω)</span>
+          <input type="text" inputmode="decimal" id="r1" placeholder="Ej: 1000">
+        </label>
+        <label class="campo"><span>R<sub>2</sub> (Ω)</span>
+          <input type="text" inputmode="decimal" id="r2" placeholder="Ej: 2200">
+        </label>
+        <label class="campo"><span>R<sub>3</sub> (Ω)</span>
+          <input type="text" inputmode="decimal" id="r3" placeholder="Ej: 1000">
+        </label>
+        <label class="campo"><span>R<sub>4</sub> (Ω)</span>
+          <input type="text" inputmode="decimal" id="r4" placeholder="Ej: 3300">
+        </label>
+      </div>
+      <button class="boton" id="btn-verificar">Calcular</button>
+      <!-- Aquí aparece el resultado (empieza oculto) -->
+      <div id="resultado-pre" class="resultado" hidden></div>
+    </section>
+
+    <!-- 4. MONTAJE -->
+    <section id="montaje" class="seccion">
+      <h2>4. Montaje</h2>
+      <p>Antes de medir, revisa cada punto:</p>
+      <ul class="chequeo">
+        <li><label><input type="checkbox"> Los resistores coinciden con el código de colores del circuito.</label></li>
+        <li><label><input type="checkbox"> El amperímetro está en serie con la rama que vas a medir.</label></li>
+        <li><label><input type="checkbox"> El voltímetro está en paralelo con el elemento.</label></li>
+        <li><label><input type="checkbox"> La punta roja va al punto de mayor potencial.</label></li>
+        <li><label><input type="checkbox"> El multímetro está en la escala correcta (mA o V).</label></li>
+      </ul>
+      <p class="pregunta">¿El circuito funcionó a la primera?</p>
+      <div class="opciones">
+        <label><input type="radio" name="primera" value="si"> Sí</label>
+        <label><input type="radio" name="primera" value="no"> No</label>
+      </div>
+    </section>
+
+    <!-- 5. MEDICIONES -->
+    <section id="mediciones" class="seccion">
+      <h2>5. Mediciones</h2>
+      <p>Anota lo que te dio la simulación en LTspice y lo que marca el multímetro.
+         La página compara cada medición con el valor teórico de la pre-verificación.</p>
+
+      <p class="tabla-titulo">Corrientes (mA)</p>
+      <div class="tabla-scroll">
+        <table class="tabla-mediciones">
+          <tr><th>Corriente</th><th>LTspice</th><th>Medida</th><th>Error</th></tr>
+          <tr><td>I<sub>1</sub><span class="teo">teórico: —</span></td><td><input type="text" inputmode="decimal" class="sim" data-mag="I1"></td><td><input type="text" inputmode="decimal" class="medida" data-mag="I1"></td><td class="error">—</td></tr>
+          <tr><td>I<sub>2</sub><span class="teo">teórico: —</span></td><td><input type="text" inputmode="decimal" class="sim" data-mag="I2"></td><td><input type="text" inputmode="decimal" class="medida" data-mag="I2"></td><td class="error">—</td></tr>
+          <tr><td>I<sub>3</sub><span class="teo">teórico: —</span></td><td><input type="text" inputmode="decimal" class="sim" data-mag="I3"></td><td><input type="text" inputmode="decimal" class="medida" data-mag="I3"></td><td class="error">—</td></tr>
+        </table>
+      </div>
+
+      <p class="tabla-titulo">Voltajes (V)</p>
+      <div class="tabla-scroll">
+        <table class="tabla-mediciones">
+          <tr><th>Voltaje</th><th>LTspice</th><th>Medido</th><th>Error</th></tr>
+          <tr><td>V<sub>R1</sub><span class="teo">teórico: —</span></td><td><input type="text" inputmode="decimal" class="sim" data-mag="VR1"></td><td><input type="text" inputmode="decimal" class="medida" data-mag="VR1"></td><td class="error">—</td></tr>
+          <tr><td>V<sub>R2</sub><span class="teo">teórico: —</span></td><td><input type="text" inputmode="decimal" class="sim" data-mag="VR2"></td><td><input type="text" inputmode="decimal" class="medida" data-mag="VR2"></td><td class="error">—</td></tr>
+          <tr><td>V<sub>R3</sub><span class="teo">teórico: —</span></td><td><input type="text" inputmode="decimal" class="sim" data-mag="VR3"></td><td><input type="text" inputmode="decimal" class="medida" data-mag="VR3"></td><td class="error">—</td></tr>
+          <tr><td>V<sub>R4</sub><span class="teo">teórico: —</span></td><td><input type="text" inputmode="decimal" class="sim" data-mag="VR4"></td><td><input type="text" inputmode="decimal" class="medida" data-mag="VR4"></td><td class="error">—</td></tr>
+        </table>
+      </div>
+
+      <!-- Consejo que aparece si alguna medición se aleja mucho de la teórica -->
+      <div id="aviso-mediciones" class="aviso" hidden>
+        <strong>Alguna medición se aleja más de 10&nbsp;% de la teórica.</strong>
+        Revisa que el amperímetro esté en serie con la rama correcta, que el voltímetro esté
+        en paralelo con el resistor, la escala del multímetro y las unidades (mA o V).
+      </div>
+    </section>
+
+    <!-- 6. COMPARACIÓN -->
+    <section id="comparacion" class="seccion">
+      <h2>6. Comparación</h2>
+      <div id="resumen-comparacion">
+        <p>Completa la pre-verificación y al menos dos mediciones para ver la comparación.</p>
+      </div>
+    </section>
+
+    <!-- 7. ENVIAR RESULTADOS -->
+    <section id="enviar" class="seccion">
+      <h2>7. Enviar resultados</h2>
+      <p>Cuando termines, envía tus resultados al registro del proyecto de grado.
+         Solo se envía el código de grupo, nunca nombres.</p>
+      <label class="campo"><span>Código de grupo</span>
+        <input type="text" id="grupo" placeholder="Ej: G07" maxlength="10" autocapitalize="characters">
+      </label>
+      <button class="boton" id="btn-enviar">Enviar resultados</button>
+      <!-- Aquí aparece si el envío funcionó o no -->
+      <p id="estado-envio" class="estado-envio" hidden></p>
+    </section>
+
+  </main>
+
+  <footer>
+    <p>Tus datos se guardan solos en este dispositivo.
+       <button id="borrar-datos" class="enlace">Borrar mis datos</button></p>
+    <p>Proyecto de grado · Ingeniería Eléctrica · Uninorte</p>
+  </footer>
+
+  <!-- JavaScript: guardado, registro y cálculos del lab (en ese orden) -->
+  <script src="js/guardado.js"></script>
+  <script src="js/registro.js"></script>
+  <script src="js/lab2.js"></script>
+</body>
+</html>

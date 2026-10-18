@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lab 1: Ley de Ohm · Circuitos I</title>
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<!-- "lab" = página de laboratorio; "lab-ohm" = usa el color naranja de Ohm -->
+<body class="lab lab-ohm">
+
+  <header>
+    <div class="contenido">
+      <a class="volver" href="index.html">← Volver a los laboratorios</a>
+      <div class="encabezado-lab">
+        <span class="simbolo">Ω</span>
+        <div>
+          <h1>Lab 1: Ley de Ohm</h1>
+          <p>Relación entre voltaje, corriente y resistencia.</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Menú: cada enlace lleva a la sección que tiene ese id -->
+  <nav class="secciones">
+    <div class="contenido">
+      <a href="#guia">1. Guía</a>
+      <a href="#video">2. Video</a>
+      <a href="#preverificacion">3. Pre-verificación</a>
+      <a href="#montaje">4. Montaje</a>
+      <a href="#mediciones">5. Mediciones</a>
+      <a href="#comparacion">6. Comparación</a>
+      <a href="#enviar">7. Enviar</a>
+    </div>
+  </nav>
+
+  <main class="contenido">
+
+    <!-- 1. GUÍA -->
+    <section id="guia" class="seccion">
+      <h2>1. Guía del laboratorio</h2>
+      <p><strong>Objetivo:</strong> verificar experimentalmente la relación V = I·R y obtener
+         el valor de la resistencia a partir de la pendiente de la curva V–I.</p>
+      <p><strong>Materiales:</strong></p>
+      <ul>
+        <li>Fuente DC variable</li>
+        <li>Resistor de 1 kΩ, 1/4 W</li>
+        <li>Multímetro digital</li>
+        <li>Protoboard y cables</li>
+      </ul>
+      <div class="aviso">
+        <strong>Seguridad:</strong> el resistor soporta máximo 0,25 W. Con 1 kΩ,
+        no superes 15,8 V en la fuente.
+      </div>
+      <a class="boton" href="docs/guia-lab1.pdf" target="_blank">Abrir guía completa (PDF)</a>
+    </section>
+
+    <!-- 2. VIDEO -->
+    <section id="video" class="seccion video">
+      <h2>2. Video de montaje</h2>
+      <div class="video-pendiente">Aquí irá el video de montaje del circuito.</div>
+      <!-- Cuando tengas el video en YouTube, borra el bloque de arriba y usa este,
+           cambiando ID_DEL_VIDEO por el código de tu video:
+      <iframe src="https://www.youtube.com/embed/ID_DEL_VIDEO"
+              title="Montaje del Lab 1" allowfullscreen></iframe>
+      -->
+    </section>
+
+    <!-- 3. PRE-VERIFICACIÓN -->
+    <section id="preverificacion" class="seccion">
+      <h2>3. Pre-verificación</h2>
+      <p>Antes de encender la fuente, escribe los valores de tu montaje.</p>
+      <label class="campo"><span>Voltaje de la fuente (V)</span>
+        <input type="text" inputmode="decimal" id="voltaje" placeholder="Ej: 5">
+      </label>
+      <label class="campo"><span>Resistencia (Ω)</span>
+        <input type="text" inputmode="decimal" id="resistencia" placeholder="Ej: 1000">
+      </label>
+      <button class="boton" id="btn-verificar">Verificar</button>
+      <!-- Aquí aparece el resultado (empieza oculto) -->
+      <div id="resultado-pre" class="resultado" hidden></div>
+    </section>
+
+    <!-- 4. MONTAJE -->
+    <section id="montaje" class="seccion">
+      <h2>4. Montaje</h2>
+      <p>Antes de medir, revisa cada punto:</p>
+      <ul class="chequeo">
+        <li><label><input type="checkbox"> El amperímetro está en serie con el resistor.</label></li>
+        <li><label><input type="checkbox"> El voltímetro está en paralelo con el resistor.</label></li>
+        <li><label><input type="checkbox"> La fuente está en 0 V antes de encenderla.</label></li>
+        <li><label><input type="checkbox"> El multímetro está en la escala correcta (mA o V).</label></li>
+      </ul>
+      <p class="pregunta">¿El circuito funcionó a la primera?</p>
+      <div class="opciones">
+        <label><input type="radio" name="primera" value="si"> Sí</label>
+        <label><input type="radio" name="primera" value="no"> No</label>
+      </div>
+    </section>
+
+    <!-- 5. MEDICIONES -->
+    <section id="mediciones" class="seccion">
+      <h2>5. Mediciones</h2>
+      <p>Varía el voltaje de la fuente y anota la corriente que marca el multímetro.
+         La página la compara con la corriente teórica, usando la resistencia de la pre-verificación.</p>
+      <div class="tabla-scroll">
+        <table class="tabla-mediciones">
+          <tr><th>Fuente (V)</th><th>Medida (mA)</th><th>Teórica (mA)</th><th>Error</th></tr>
+          <tr><td>2</td><td><input type="text" inputmode="decimal" class="medida" data-v="2"></td><td class="teorica">—</td><td class="error">—</td></tr>
+          <tr><td>4</td><td><input type="text" inputmode="decimal" class="medida" data-v="4"></td><td class="teorica">—</td><td class="error">—</td></tr>
+          <tr><td>6</td><td><input type="text" inputmode="decimal" class="medida" data-v="6"></td><td class="teorica">—</td><td class="error">—</td></tr>
+          <tr><td>8</td><td><input type="text" inputmode="decimal" class="medida" data-v="8"></td><td class="teorica">—</td><td class="error">—</td></tr>
+          <tr><td>10</td><td><input type="text" inputmode="decimal" class="medida" data-v="10"></td><td class="teorica">—</td><td class="error">—</td></tr>
+        </table>
+      </div>
+      <!-- Consejo que aparece si alguna medición se aleja mucho de la teórica -->
+      <div id="aviso-mediciones" class="aviso" hidden>
+        <strong>Alguna medición se aleja más de 10&nbsp;% de la teórica.</strong>
+        Revisa que el amperímetro esté en serie, que el multímetro esté en la escala de mA
+        y que escribiste el valor en mA (por ejemplo 4,07 y no 4070).
+      </div>
+    </section>
+
+    <!-- 6. COMPARACIÓN -->
+    <section id="comparacion" class="seccion">
+      <h2>6. Comparación</h2>
+      <div id="resumen-comparacion">
+        <p>Escribe la resistencia en la pre-verificación y al menos dos mediciones para ver la comparación.</p>
+      </div>
+      <div id="caja-grafica" class="grafica" hidden>
+        <canvas id="grafica-vi" aria-label="Gráfica de voltaje contra corriente: medido y teórico"></canvas>
+      </div>
+    </section>
+
+    <!-- 7. ENVIAR RESULTADOS -->
+    <section id="enviar" class="seccion">
+      <h2>7. Enviar resultados</h2>
+      <p>Cuando termines, envía tus resultados al registro del proyecto de grado.
+         Solo se envía el código de grupo, nunca nombres.</p>
+      <label class="campo"><span>Código de grupo</span>
+        <input type="text" id="grupo" placeholder="Ej: G07" maxlength="10" autocapitalize="characters">
+      </label>
+      <button class="boton" id="btn-enviar">Enviar resultados</button>
+      <!-- Aquí aparece si el envío funcionó o no -->
+      <p id="estado-envio" class="estado-envio" hidden></p>
+    </section>
+
+  </main>
+
+  <footer>
+    <p>Tus datos se guardan solos en este dispositivo.
+       <button id="borrar-datos" class="enlace">Borrar mis datos</button></p>
+    <p>Proyecto de grado · Ingeniería Eléctrica · Uninorte</p>
+  </footer>
+
+  <!-- Librería para la gráfica (se descarga de internet) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+  <!-- JavaScript: guardado, registro y cálculos del lab (en ese orden) -->
+  <script src="js/guardado.js"></script>
+  <script src="js/registro.js"></script>
+  <script src="js/lab1.js"></script>
+</body>
+</html>
