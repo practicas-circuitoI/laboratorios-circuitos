@@ -394,3 +394,32 @@ footer p { margin: 4px 0; }
 @media (max-width: 600px) {
   .indicadores li:last-child:nth-child(odd) { grid-column: 1 / -1; }
 }
+/* ===================================================
+   Agregado con la guía de errores comunes
+   =================================================== */
+
+/* Sugerencias automáticas dentro del aviso rojo */
+.seccion .diagnostico { margin: 8px 0 0; padding-left: 18px; color: inherit; }
+.diagnostico li { margin-bottom: 6px; }
+
+/* Guía desplegable */
+.errores-comunes { margin-top: 18px; }
+.errores-comunes details { border-bottom: 1px solid #eef0f4; }
+.errores-comunes summary {
+  cursor: pointer;
+  position: relative;
+  padding: 12px 0 12px 22px;   /* espacio a la izquierda para el "+" */
+  font-weight: 600;
+  color: #1d2230;
+  list-style: none;
+}
+.errores-comunes summary::-webkit-details-marker { display: none; }
+.errores-comunes summary::before {
+  content: "+";
+  position: absolute;
+  left: 0;
+  color: var(--color);
+  font-weight: 800;
+}
+.errores-comunes details[open] summary::before { content: "−"; }
+.errores-comunes details p { margin: 0 0 12px 22px; }
