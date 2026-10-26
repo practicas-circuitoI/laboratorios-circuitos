@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lab 4: Análisis AC · Circuitos I</title>
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<!-- "lab-ac" = usa el color azul del Lab 4 -->
+<body class="lab lab-ac">
+
+  <header>
+    <div class="contenido">
+      <a class="volver" href="index.html">← Volver a los laboratorios</a>
+      <div class="encabezado-lab">
+        <span class="simbolo">V~</span>
+        <div>
+          <h1>Lab 4: Análisis AC</h1>
+          <p>Medición de señales con osciloscopio.</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <nav class="secciones">
+    <div class="contenido">
+      <a href="#guia">1. Guía</a>
+      <a href="#video">2. Videos</a>
+      <a href="#preverificacion">3. Pre-verificación</a>
+      <a href="#montaje">4. Montaje</a>
+      <a href="#mediciones">5. Mediciones</a>
+      <a href="#comparacion">6. Comparación</a>
+      <a href="#enviar">7. Enviar</a>
+    </div>
+  </nav>
+
+  <main class="contenido">
+
+    <!-- 1. GUÍA -->
+    <section id="guia" class="seccion">
+      <h2>1. Guía del laboratorio</h2>
+      <p><strong>Objetivo:</strong> medir con el osciloscopio la amplitud y el desfase del voltaje
+         en el capacitor de un circuito RC, compararlos con el análisis fasorial y encontrar
+         la frecuencia de corte.</p>
+
+      <p><strong>Circuito:</strong></p>
+      <!-- Dibujo del circuito: generador, R en serie y C a tierra, con las dos sondas -->
+      <svg class="esquema" viewBox="0 0 520 250" role="img"
+           aria-label="Circuito RC: generador senoidal, R en serie y C a tierra. CH1 mide el generador y CH2 el capacitor">
+        <g fill="none" stroke="#1d2230" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+          <!-- Cables -->
+          <path d="M70 105 V55 H170"/>
+          <path d="M250 55 H400 V118"/>
+          <path d="M400 134 V205 H70 V165"/>
+          <!-- Resistor R en zigzag -->
+          <path d="M170 55 l5 -10 l10 20 l10 -20 l10 20 l10 -20 l10 20 l10 -20 l10 20 l5 -10"/>
+          <!-- Capacitor C: dos placas -->
+          <path d="M374 118 H426"/>
+          <path d="M374 134 H426"/>
+          <!-- Generador con la onda senoidal -->
+          <circle cx="70" cy="135" r="30"/>
+          <path d="M52 135 q9 -18 18 0 t18 0" stroke-width="2"/>
+          <!-- Tierra -->
+          <path d="M235 205 V218 M219 218 H251 M225 225 H245 M231 232 H239"/>
+        </g>
+        <!-- Puntos donde van las sondas del osciloscopio -->
+        <circle class="corriente" cx="110" cy="55" r="6"/>
+        <circle class="corriente" cx="400" cy="55" r="6"/>
+        <text class="corriente" x="110" y="32" text-anchor="middle">CH1</text>
+        <text class="corriente" x="400" y="32" text-anchor="middle">CH2</text>
+        <!-- Nombres de los elementos -->
+        <text x="210" y="32" text-anchor="middle">R</text>
+        <text x="440" y="133">C</text>
+        <text x="4" y="142">v<tspan dy="4" font-size="14">s</tspan></text>
+        <text class="malla" x="235" y="196" text-anchor="middle">tierra común</text>
+      </svg>
+
+      <p><strong>Materiales:</strong></p>
+      <ul>
+        <li>Generador de funciones (onda senoidal, 10&nbsp;Vpp)</li>
+        <li>Osciloscopio de dos canales con sus dos sondas</li>
+        <li>Resistor R = 1&nbsp;kΩ, 1/4&nbsp;W</li>
+        <li>Capacitor C = 100&nbsp;nF (poliéster o cerámico, sin polaridad)</li>
+        <li>Protoboard y cables</li>
+      </ul>
+      <div class="aviso">
+        <strong>Seguridad:</strong> las tierras (caimanes negros) de las dos sondas y del generador
+        están unidas por dentro a la tierra del tomacorriente. Conéctalas <strong>siempre al mismo
+        punto</strong>: la tierra del circuito. Si pones una en otro nodo, haces un cortocircuito.
+      </div>
+      <a class="boton" href="docs/guia-lab4.pdf" target="_blank">Abrir guía completa (PDF)</a>
+    </section>
+
+    <!-- 2. VIDEOS -->
+    <section id="video" class="seccion video">
+      <h2>2. Videos</h2>
+      <p>Mira estos dos videos antes de llegar al laboratorio: el primero explica cómo manejar
+         el osciloscopio y el segundo muestra una práctica muy parecida a esta.</p>
+
+      <!-- Video 1: manejo del osciloscopio -->
+      <p class="tabla-titulo">1. Manejo básico del osciloscopio</p>
+      <iframe src="https://www.youtube-nocookie.com/embed/CyLriTZ7fpo"
+              title="Manejo básico del osciloscopio" loading="lazy"
+              referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+      <p class="nota">Canal: David A. Guzmán Rincón. ¿No se ve?
+         <a href="https://www.youtube.com/watch?v=CyLriTZ7fpo" target="_blank">Ábrelo en YouTube</a>.</p>
+
+      <!-- Video 2: la práctica completa de un circuito RC -->
+      <p class="tabla-titulo">2. Respuesta en frecuencia de un circuito RC (experiencia de laboratorio)</p>
+      <iframe src="https://www.youtube-nocookie.com/embed/agovgqyIVX4"
+              title="Respuesta frecuencial de un circuito RC" loading="lazy"
+              referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+      <p class="nota">Canal: Automatica. ¿No se ve?
+         <a href="https://www.youtube.com/watch?v=agovgqyIVX4" target="_blank">Ábrelo en YouTube</a>.</p>
+
+      <!-- Video de montaje propio del laboratorio -->
+      <p class="tabla-titulo">Montaje de este laboratorio</p>
+      <div class="video-pendiente">Aquí irá el video de montaje del circuito.</div>
+      <!-- Cuando tengas el video en YouTube, borra el bloque de arriba y usa este:
+      <iframe src="https://www.youtube-nocookie.com/embed/ID_DEL_VIDEO"
+              title="Montaje del Lab 4" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+      -->
+    </section>
+
+    <!-- 3. PRE-VERIFICACIÓN -->
+    <section id="preverificacion" class="seccion">
+      <h2>3. Pre-verificación</h2>
+      <p>Escribe los valores de tu montaje. La página calculará la frecuencia de corte y los fasores
+         del circuito, y te dirá qué deberías ver en el osciloscopio.</p>
+      <div class="campos">
+        <label class="campo"><span>Generador (Vpp)</span>
+          <input type="text" inputmode="decimal" id="vpp" placeholder="Ej: 10">
+        </label>
+        <label class="campo"><span>Frecuencia (Hz)</span>
+          <input type="text" inputmode="decimal" id="frecuencia" placeholder="Ej: 1000">
+        </label>
+        <label class="campo"><span>R (Ω)</span>
+          <input type="text" inputmode="decimal" id="r" placeholder="Ej: 1000">
+        </label>
+        <label class="campo"><span>C (nF)</span>
+          <input type="text" inputmode="decimal" id="c" placeholder="Ej: 100">
+        </label>
+      </div>
+      <button class="boton" id="btn-verificar">Calcular</button>
+      <!-- Aquí aparece el resultado (empieza oculto) -->
+      <div id="resultado-pre" class="resultado" hidden></div>
+    </section>
+
+    <!-- 4. MONTAJE -->
+    <section id="montaje" class="seccion">
+      <h2>4. Montaje</h2>
+      <p>Antes de medir, revisa cada punto:</p>
+      <ul class="chequeo">
+        <li><label><input type="checkbox"> El generador está en onda senoidal, con la amplitud de la pre-verificación.</label></li>
+        <li><label><input type="checkbox"> Los caimanes negros de las dos sondas están en la tierra del circuito.</label></li>
+        <li><label><input type="checkbox"> CH1 mide la salida del generador y CH2 el voltaje del capacitor.</label></li>
+        <li><label><input type="checkbox"> La atenuación de cada sonda (×1 o ×10) coincide con la de su canal.</label></li>
+        <li><label><input type="checkbox"> Los dos canales están en acoplamiento DC (no en GND) y el disparo (trigger) está en CH1.</label></li>
+      </ul>
+      <p class="pregunta">¿El circuito funcionó a la primera?</p>
+      <div class="opciones">
+        <label><input type="radio" name="primera" value="si"> Sí</label>
+        <label><input type="radio" name="primera" value="no"> No</label>
+      </div>
+    </section>
+
+    <!-- 5. MEDICIONES -->
+    <section id="mediciones" class="seccion">
+      <h2>5. Mediciones</h2>
+      <p>Para cada frecuencia, ajusta el generador y anota la amplitud pico a pico de CH1 (generador)
+         y de CH2 (capacitor), y el retraso Δt de CH2 respecto a CH1 en microsegundos.
+         La página calcula la ganancia |V<sub>C</sub>/V<sub>s</sub>| y el desfase, y los compara con lo teórico.</p>
+
+      <div class="tabla-scroll">
+        <table class="tabla-mediciones" id="tabla-ac">
+          <tr><th>Frec.</th><th>CH1 (Vpp)</th><th>CH2 (Vpp)</th><th>Δt (µs)</th><th>Error<span class="teo">|H| · φ</span></th></tr>
+          <tr data-f="100"><td><strong>100&nbsp;Hz</strong><span class="teo">teórico: —</span></td><td><input type="text" inputmode="decimal" class="ch1"></td><td><input type="text" inputmode="decimal" class="ch2"></td><td><input type="text" inputmode="decimal" class="dt"></td><td class="error">—</td></tr>
+          <tr data-f="500"><td><strong>500&nbsp;Hz</strong><span class="teo">teórico: —</span></td><td><input type="text" inputmode="decimal" class="ch1"></td><td><input type="text" inputmode="decimal" class="ch2"></td><td><input type="text" inputmode="decimal" class="dt"></td><td class="error">—</td></tr>
+          <tr data-f="1000"><td><strong>1&nbsp;kHz</strong><span class="teo">teórico: —</span></td><td><input type="text" inputmode="decimal" class="ch1"></td><td><input type="text" inputmode="decimal" class="ch2"></td><td><input type="text" inputmode="decimal" class="dt"></td><td class="error">—</td></tr>
+          <tr data-f="1600"><td><strong>1,6&nbsp;kHz</strong><span class="teo">teórico: —</span></td><td><input type="text" inputmode="decimal" class="ch1"></td><td><input type="text" inputmode="decimal" class="ch2"></td><td><input type="text" inputmode="decimal" class="dt"></td><td class="error">—</td></tr>
+          <tr data-f="5000"><td><strong>5&nbsp;kHz</strong><span class="teo">teórico: —</span></td><td><input type="text" inputmode="decimal" class="ch1"></td><td><input type="text" inputmode="decimal" class="ch2"></td><td><input type="text" inputmode="decimal" class="dt"></td><td class="error">—</td></tr>
+          <tr data-f="10000"><td><strong>10&nbsp;kHz</strong><span class="teo">teórico: —</span></td><td><input type="text" inputmode="decimal" class="ch1"></td><td><input type="text" inputmode="decimal" class="ch2"></td><td><input type="text" inputmode="decimal" class="dt"></td><td class="error">—</td></tr>
+        </table>
+      </div>
+
+      <!-- Consejo que aparece si alguna medición se aleja mucho de la teórica -->
+      <div id="aviso-mediciones" class="aviso" hidden>
+        <strong>Alguna medición se aleja de lo teórico</strong> (más de 10&nbsp;% en la ganancia
+        o más de 5° en el desfase). Posible causa:
+        <!-- Aquí js/lab4.js escribe una sugerencia por cada fila en rojo -->
+        <ul id="diagnostico" class="diagnostico"></ul>
+      </div>
+
+      <!-- Guía de errores comunes: cada pregunta se abre al tocarla -->
+      <div class="errores-comunes">
+        <p class="tabla-titulo">¿Algo no cuadra? Errores comunes</p>
+        <details>
+          <summary>Al conectar las sondas, el generador o el circuito dejan de funcionar</summary>
+          <p>Seguramente un caimán negro quedó en un punto distinto de la tierra del circuito. Las tierras del
+             osciloscopio y del generador están unidas entre sí, así que eso cortocircuita parte del montaje.
+             Pon los dos caimanes negros en la tierra común.</p>
+        </details>
+        <details>
+          <summary>No se ve la señal o se ve una línea plana</summary>
+          <p>Revisa que el canal esté encendido, que su acoplamiento no esté en GND y que la escala vertical
+             (V/div) no sea demasiado grande o pequeña. Presiona Autoset y luego ajusta.</p>
+        </details>
+        <details>
+          <summary>La señal se mueve o no se queda quieta en la pantalla</summary>
+          <p>Ajusta el disparo (trigger): fuente en CH1, flanco de subida y nivel cerca de 0&nbsp;V.</p>
+        </details>
+        <details>
+          <summary>La amplitud sale 10 veces mayor o menor</summary>
+          <p>La sonda está en ×10 y el canal en ×1, o al revés. Pon la misma atenuación en la sonda y en el
+             menú del canal.</p>
+        </details>
+        <details>
+          <summary>El generador muestra un valor y el osciloscopio el doble</summary>
+          <p>El generador está configurado para una carga de 50&nbsp;Ω. Cámbialo a alta impedancia (High-Z)
+             para que la amplitud que muestra coincida con la real.</p>
+        </details>
+        <details>
+          <summary>La amplitud de CH1 baja al subir la frecuencia</summary>
+          <p>Es normal: el generador tiene una resistencia interna de unos 50&nbsp;Ω y el circuito le pide más
+             corriente a frecuencias altas. Por eso se anota CH1 en cada frecuencia y la ganancia se calcula
+             con CH2/CH1.</p>
+        </details>
+        <details>
+          <summary>CH2 se ve adelantada respecto a CH1, o CH2 es mayor que CH1</summary>
+          <p>En este circuito el voltaje del capacitor siempre es menor y va atrasado. Revisa que no hayas
+             intercambiado los canales y que CH2 esté sobre el capacitor y no sobre el resistor.</p>
+        </details>
+        <details>
+          <summary>Cómo medir bien el desfase Δt</summary>
+          <p>Mide el tiempo entre dos cruces por cero en el mismo sentido (las dos señales subiendo). Amplía la
+             base de tiempo (s/div) para leerlo mejor o usa los cursores del osciloscopio.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- 6. COMPARACIÓN -->
+    <section id="comparacion" class="seccion">
+      <h2>6. Comparación</h2>
+      <label class="campo"><span>Frecuencia de corte en LTspice (Hz)</span>
+        <input type="text" inputmode="decimal" id="fc-ltspice" placeholder="Ej: 1592">
+      </label>
+      <p class="nota">Haz un análisis .ac del circuito en LTspice y busca la frecuencia donde
+         V<sub>C</sub>/V<sub>s</sub> cae a 0,707 (−3&nbsp;dB).</p>
+      <div id="resumen-comparacion">
+        <p>Completa la pre-verificación y al menos dos mediciones para ver la comparación.</p>
+      </div>
+      <!-- Gráficas de Bode: ganancia y desfase contra frecuencia -->
+      <div id="caja-grafica" hidden>
+        <p class="tabla-titulo">Ganancia |V<sub>C</sub>/V<sub>s</sub>|</p>
+        <div class="grafica"><canvas id="grafica-ganancia" aria-label="Ganancia medida y teórica contra frecuencia"></canvas></div>
+        <p class="tabla-titulo">Desfase de V<sub>C</sub> respecto a V<sub>s</sub> (°)</p>
+        <div class="grafica"><canvas id="grafica-fase" aria-label="Desfase medido y teórico contra frecuencia"></canvas></div>
+      </div>
+    </section>
+
+    <!-- 7. ENVIAR RESULTADOS -->
+    <section id="enviar" class="seccion">
+      <h2>7. Enviar resultados</h2>
+      <p>Cuando termines, envía tus resultados al registro del proyecto de grado.
+         Solo se envía el código de grupo, nunca nombres.</p>
+      <label class="campo"><span>Código de grupo</span>
+        <input type="text" id="grupo" placeholder="Ej: G07" maxlength="10" autocapitalize="characters">
+      </label>
+      <button class="boton" id="btn-enviar">Enviar resultados</button>
+      <!-- Aquí aparece si el envío funcionó o no -->
+      <p id="estado-envio" class="estado-envio" hidden></p>
+    </section>
+
+  </main>
+
+  <footer>
+    <p>Tus datos se guardan solos en este dispositivo.
+       <button id="borrar-datos" class="enlace">Borrar mis datos</button></p>
+    <p>Proyecto de grado · Ingeniería Eléctrica · Uninorte</p>
+  </footer>
+
+  <!-- Librería para las gráficas (se descarga de internet) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+  <!-- JavaScript: guardado, registro y cálculos del lab (en ese orden).
+       El Lab 4 trae su propio diagnóstico, por eso no usa diagnostico.js -->
+  <script src="js/guardado.js"></script>
+  <script src="js/registro.js"></script>
+  <script src="js/lab4.js"></script>
+</body>
+</html>

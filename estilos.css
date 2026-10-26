@@ -423,3 +423,36 @@ footer p { margin: 4px 0; }
 }
 .errores-comunes details[open] summary::before { content: "−"; }
 .errores-comunes details p { margin: 0 0 12px 22px; }
+/* ===================================================
+   Agregado con el Lab 4 (Análisis AC)
+   =================================================== */
+
+/* Tabla de mediciones con tres casillas por fila: más compacta */
+.lab-ac .tabla-mediciones th,
+.lab-ac .tabla-mediciones td { padding: 8px 4px; }
+.lab-ac .tabla-mediciones td input { min-width: 48px; max-width: 64px; padding: 8px 2px; font-size: 15px; text-align: center; }
+.lab-ac .tabla-mediciones th { font-size: 13px; }
+.lab-ac .tabla-mediciones .teo { font-size: 11px; }
+
+/* En la columna de error van dos etiquetas (ganancia y desfase), una debajo de otra */
+.lab-ac .tabla-mediciones .chip { display: block; width: fit-content; margin: 2px 0; padding: 2px 6px; font-size: 12px; }
+
+/* Diagrama fasorial dentro del resultado de la pre-verificación */
+.fasores {
+  display: block;
+  width: 100%;
+  max-width: 360px;
+  height: auto;
+  margin: 10px 0;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 8px;
+}
+.fasores text { font-size: 15px; font-weight: 700; }
+
+/* Separación entre las dos gráficas */
+.grafica + .tabla-titulo { margin-top: 22px; }
+
+/* En computador, los seis indicadores en dos filas de tres */
+@media (min-width: 601px) {
+  .lab-ac .indicadores { grid-template-columns: repeat(3, 1fr); }
+}
