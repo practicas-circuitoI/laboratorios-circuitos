@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lab 4: Análisis AC · Circuitos I</title>
+  <title>Lab 4: Osciloscopio y AC · Circuitos I</title>
   <link rel="stylesheet" href="estilos.css">
 </head>
 <!-- "lab-ac" = usa el color azul del Lab 4 -->
@@ -15,8 +15,8 @@
       <div class="encabezado-lab">
         <span class="simbolo">V~</span>
         <div>
-          <h1>Lab 4: Análisis AC</h1>
-          <p>Medición de señales con osciloscopio.</p>
+          <h1>Lab 4: Osciloscopio y AC</h1>
+          <p>Amplitud y fase en un circuito R–C con generador y osciloscopio.</p>
         </div>
       </div>
     </div>
@@ -26,7 +26,7 @@
     <div class="contenido">
       <a href="#guia">1. Guía</a>
       <a href="#video">2. Videos</a>
-      <a href="#preverificacion">3. Pre-verificación</a>
+      <a href="#teoria">3. Cálculo teórico</a>
       <a href="#montaje">4. Montaje</a>
       <a href="#mediciones">5. Mediciones</a>
       <a href="#comparacion">6. Comparación</a>
@@ -39,54 +39,79 @@
     <!-- 1. GUÍA -->
     <section id="guia" class="seccion">
       <h2>1. Guía del laboratorio</h2>
-      <p><strong>Objetivo:</strong> medir con el osciloscopio la amplitud y el desfase del voltaje
-         en el capacitor de un circuito RC, compararlos con el análisis fasorial y encontrar
-         la frecuencia de corte.</p>
+      <p class="actividad">Práctica IV</p>
+      <p><strong>Objetivo:</strong> medir y analizar la respuesta en amplitud y en fase de un circuito R–C
+         en corriente alterna, con el generador de funciones y el osciloscopio, y comparar los resultados
+         teóricos, simulados y experimentales.</p>
+      <p><strong>Antes del laboratorio:</strong> resuelve en la guía las Actividades 1, 2 y 3 (preguntas previas,
+         análisis teórico y simulación en LTspice). En esta página puedes revisar tus cálculos (sección 3).</p>
 
-      <p><strong>Circuito:</strong></p>
-      <!-- Dibujo del circuito: generador, R en serie y C a tierra, con las dos sondas -->
-      <svg class="esquema" viewBox="0 0 520 250" role="img"
-           aria-label="Circuito RC: generador senoidal, R en serie y C a tierra. CH1 mide el generador y CH2 el capacitor">
+      <p><strong>Circuito (Figura 1 de la guía):</strong></p>
+      <!-- R1‖C1 en serie con R2‖C2; Vout se toma sobre R2‖C2 -->
+      <svg class="esquema" viewBox="0 0 520 270" role="img"
+           aria-label="Circuito: R1 en paralelo con C1, en serie con R2 en paralelo con C2. CH1 mide la entrada y CH2 la salida">
         <g fill="none" stroke="#1d2230" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
-          <!-- Cables -->
-          <path d="M70 105 V55 H170"/>
-          <path d="M250 55 H400 V118"/>
-          <path d="M400 134 V205 H70 V165"/>
-          <!-- Resistor R en zigzag -->
-          <path d="M170 55 l5 -10 l10 20 l10 -20 l10 20 l10 -20 l10 20 l10 -20 l10 20 l5 -10"/>
-          <!-- Capacitor C: dos placas -->
-          <path d="M374 118 H426"/>
-          <path d="M374 134 H426"/>
-          <!-- Generador con la onda senoidal -->
-          <circle cx="70" cy="135" r="30"/>
-          <path d="M52 135 q9 -18 18 0 t18 0" stroke-width="2"/>
+          <!-- Cables de arriba -->
+          <path d="M60 122 V90 H170"/>
+          <path d="M250 90 H440"/>
+          <!-- R1 en zigzag -->
+          <path d="M170 90 l5 -10 l10 20 l10 -20 l10 20 l10 -20 l10 20 l10 -20 l10 20 l5 -10"/>
+          <!-- C1 en paralelo con R1 (por encima) -->
+          <path d="M140 90 V45 H204"/>
+          <path d="M216 45 H280 V90"/>
+          <path d="M204 30 V60 M216 30 V60"/>
+          <!-- R2 vertical -->
+          <path d="M330 90 V120 l-10 5 l20 10 l-20 10 l20 10 l-20 10 l20 10 l-20 10 l20 10 l-10 5 V230"/>
+          <!-- C2 vertical -->
+          <path d="M420 90 V163 M396 163 H444 M396 175 H444 M420 175 V230"/>
+          <!-- Cable de abajo y generador -->
+          <path d="M60 178 V230 H440"/>
+          <circle cx="60" cy="150" r="28"/>
+          <path d="M43 150 q8.5 -17 17 0 t17 0" stroke-width="2"/>
           <!-- Tierra -->
-          <path d="M235 205 V218 M219 218 H251 M225 225 H245 M231 232 H239"/>
+          <path d="M190 230 V243 M174 243 H206 M180 250 H200 M186 257 H194"/>
         </g>
-        <!-- Puntos donde van las sondas del osciloscopio -->
-        <circle class="corriente" cx="110" cy="55" r="6"/>
-        <circle class="corriente" cx="400" cy="55" r="6"/>
-        <text class="corriente" x="110" y="32" text-anchor="middle">CH1</text>
-        <text class="corriente" x="400" y="32" text-anchor="middle">CH2</text>
-        <!-- Nombres de los elementos -->
-        <text x="210" y="32" text-anchor="middle">R</text>
-        <text x="440" y="133">C</text>
-        <text x="4" y="142">v<tspan dy="4" font-size="14">s</tspan></text>
-        <text class="malla" x="235" y="196" text-anchor="middle">tierra común</text>
+        <!-- Nodos -->
+        <circle cx="140" cy="90" r="4.5" fill="#1d2230"/>
+        <circle cx="280" cy="90" r="4.5" fill="#1d2230"/>
+        <circle cx="330" cy="90" r="4.5" fill="#1d2230"/>
+        <circle cx="330" cy="230" r="4.5" fill="#1d2230"/>
+        <circle cx="420" cy="230" r="4.5" fill="#1d2230"/>
+        <!-- Puntos de las sondas -->
+        <circle class="corriente" cx="100" cy="90" r="6"/>
+        <circle class="corriente" cx="440" cy="90" r="6"/>
+        <text class="corriente" x="100" y="72" text-anchor="middle">CH1</text>
+        <text class="corriente" x="470" y="80" text-anchor="middle">CH2</text>
+        <!-- Nombres -->
+        <text x="210" y="122" text-anchor="middle">R<tspan dy="4" font-size="14">1</tspan></text>
+        <text x="210" y="22" text-anchor="middle">C<tspan dy="4" font-size="14">1</tspan></text>
+        <text x="352" y="172">R<tspan dy="4" font-size="14">2</tspan></text>
+        <text x="452" y="176">C<tspan dy="4" font-size="14">2</tspan></text>
+        <text x="2" y="157">V<tspan dy="4" font-size="14">in</tspan></text>
+        <text x="458" y="132">V<tspan dy="4" font-size="14">out</tspan></text>
+        <text class="malla" x="250" y="222" text-anchor="middle">tierra común</text>
       </svg>
+
+      <div class="caja-info">
+        <strong>Convención de fase:</strong> la fase de V<sub>out</sub> se mide respecto a V<sub>in</sub>.
+        Si V<sub>out</sub> cruza por cero <strong>después</strong> que V<sub>in</sub>, está atrasada y su fase
+        es <strong>negativa</strong>: fase = −Δt · f · 360°.
+      </div>
 
       <p><strong>Materiales:</strong></p>
       <ul>
-        <li>Generador de funciones (onda senoidal, 10&nbsp;Vpp)</li>
-        <li>Osciloscopio de dos canales con sus dos sondas</li>
-        <li>Resistor R = 1&nbsp;kΩ, 1/4&nbsp;W</li>
-        <li>Capacitor C = 100&nbsp;nF (poliéster o cerámico, sin polaridad)</li>
         <li>Protoboard y cables</li>
+        <li>Multímetro Fluke 179 (para medir R y C reales)</li>
+        <li>Generador de funciones BK Precision 4040B</li>
+        <li>Osciloscopio Tektronix TBS1072B con dos puntas ×10</li>
+        <li>Cable BNC al osciloscopio y cable BNC a pinzas para la protoboard</li>
+        <li>R<sub>1</sub> = 1&nbsp;kΩ, R<sub>2</sub> = 10&nbsp;kΩ, C<sub>1</sub> = 1&nbsp;nF y C<sub>2</sub> = 10&nbsp;nF (cerámicos)</li>
+        <li>Memoria USB para las capturas y computador con LTspice</li>
       </ul>
       <div class="aviso">
-        <strong>Seguridad:</strong> las tierras (caimanes negros) de las dos sondas y del generador
-        están unidas por dentro a la tierra del tomacorriente. Conéctalas <strong>siempre al mismo
-        punto</strong>: la tierra del circuito. Si pones una en otro nodo, haces un cortocircuito.
+        <strong>Seguridad:</strong> las pinzas de tierra de las dos puntas y la tierra del generador están unidas
+        por dentro. Conéctalas <strong>siempre al mismo punto</strong>: la tierra del circuito. Si pones una en
+        otro nodo, haces un cortocircuito.
       </div>
       <a class="boton" href="docs/guia-lab4.pdf" target="_blank">Abrir guía completa (PDF)</a>
     </section>
@@ -95,7 +120,7 @@
     <section id="video" class="seccion video">
       <h2>2. Videos</h2>
       <p>Mira estos dos videos antes de llegar al laboratorio: el primero explica cómo manejar
-         el osciloscopio y el segundo muestra una práctica muy parecida a esta.</p>
+         el osciloscopio y el segundo muestra una práctica parecida a esta.</p>
 
       <!-- Video 1: manejo del osciloscopio -->
       <p class="tabla-titulo">1. Manejo básico del osciloscopio</p>
@@ -113,42 +138,51 @@
       <p class="nota">Canal: Automatica. ¿No se ve?
          <a href="https://www.youtube.com/watch?v=agovgqyIVX4" target="_blank">Ábrelo en YouTube</a>.</p>
 
+    
     </section>
 
-    <!-- 3. PRE-VERIFICACIÓN -->
-    <section id="preverificacion" class="seccion">
-      <h2>3. Pre-verificación</h2>
-      <p>Escribe los valores de tu montaje. La página calculará la frecuencia de corte y los fasores
-         del circuito, y te dirá qué deberías ver en el osciloscopio.</p>
+    <!-- 3. CÁLCULO TEÓRICO -->
+    <section id="teoria" class="seccion">
+      <h2>3. Cálculo teórico</h2>
+      <p class="actividad">Actividad 2 de la guía</p>
+      <p>Primero haz el análisis fasorial a mano en la guía. Luego escribe los valores y compara:
+         la página calcula las Tablas 1 y 2. Si en la Actividad 6 el error pasa del 10&nbsp;%, escribe aquí
+         los valores medidos de la Tabla 5 y vuelve a calcular.</p>
       <div class="campos">
-        <label class="campo"><span>Generador (Vpp)</span>
-          <input type="text" inputmode="decimal" id="vpp" placeholder="Ej: 10">
+        <label class="campo"><span>R<sub>1</sub> (Ω)</span>
+          <input type="text" inputmode="decimal" id="r1" placeholder="Ej: 1000">
         </label>
-        <label class="campo"><span>Frecuencia (Hz)</span>
-          <input type="text" inputmode="decimal" id="frecuencia" placeholder="Ej: 1000">
+        <label class="campo"><span>C<sub>1</sub> (nF)</span>
+          <input type="text" inputmode="decimal" id="c1" placeholder="Ej: 1">
         </label>
-        <label class="campo"><span>R (Ω)</span>
-          <input type="text" inputmode="decimal" id="r" placeholder="Ej: 1000">
+        <label class="campo"><span>R<sub>2</sub> (Ω)</span>
+          <input type="text" inputmode="decimal" id="r2" placeholder="Ej: 10000">
         </label>
-        <label class="campo"><span>C (nF)</span>
-          <input type="text" inputmode="decimal" id="c" placeholder="Ej: 100">
+        <label class="campo"><span>C<sub>2</sub> (nF)</span>
+          <input type="text" inputmode="decimal" id="c2" placeholder="Ej: 10">
+        </label>
+        <label class="campo"><span>V<sub>in</sub> (Vpp)</span>
+          <input type="text" inputmode="decimal" id="vpp" placeholder="Ej: 2">
         </label>
       </div>
       <button class="boton" id="btn-verificar">Calcular</button>
-      <!-- Aquí aparece el resultado (empieza oculto) -->
+      <!-- Aquí aparecen las Tablas 1 y 2 (empieza oculto) -->
       <div id="resultado-pre" class="resultado" hidden></div>
     </section>
 
     <!-- 4. MONTAJE -->
     <section id="montaje" class="seccion">
       <h2>4. Montaje</h2>
-      <p>Antes de medir, revisa cada punto:</p>
+      <p class="actividad">Actividades 4 y 5 de la guía</p>
+      <p>Antes de encender la salida del generador, revisa cada punto (es la lista de verificación de la guía):</p>
       <ul class="chequeo">
-        <li><label><input type="checkbox"> El generador está en onda senoidal, con la amplitud de la pre-verificación.</label></li>
-        <li><label><input type="checkbox"> Los caimanes negros de las dos sondas están en la tierra del circuito.</label></li>
-        <li><label><input type="checkbox"> CH1 mide la salida del generador y CH2 el voltaje del capacitor.</label></li>
-        <li><label><input type="checkbox"> La atenuación de cada sonda (×1 o ×10) coincide con la de su canal.</label></li>
-        <li><label><input type="checkbox"> Los dos canales están en acoplamiento DC (no en GND) y el disparo (trigger) está en CH1.</label></li>
+        <li><label><input type="checkbox"> Visto bueno del docente obtenido.</label></li>
+        <li><label><input type="checkbox"> Valores reales de R y C medidos y registrados en la Tabla 5.</label></li>
+        <li><label><input type="checkbox"> Circuito armado igual a la Figura 1: R<sub>1</sub>‖C<sub>1</sub> en serie con R<sub>2</sub>‖C<sub>2</sub>.</label></li>
+        <li><label><input type="checkbox"> Tierras de las dos puntas y del generador en el mismo punto.</label></li>
+        <li><label><input type="checkbox"> Las dos puntas en ×10 y también configuradas en ×10 en el menú de su canal.</label></li>
+        <li><label><input type="checkbox"> Acoplamiento DC y trigger configurados.</label></li>
+        <li><label><input type="checkbox"> Generador con la amplitud que se ajustó en la Actividad 4 (2,0&nbsp;Vpp en el osciloscopio).</label></li>
       </ul>
       <p class="pregunta">¿El circuito funcionó a la primera?</p>
       <div class="opciones">
@@ -160,73 +194,76 @@
     <!-- 5. MEDICIONES -->
     <section id="mediciones" class="seccion">
       <h2>5. Mediciones</h2>
-      <p>Para cada frecuencia, ajusta el generador y anota la amplitud pico a pico de CH1 (generador)
-         y de CH2 (capacitor), y el retraso Δt de CH2 respecto a CH1 en microsegundos.
-         La página calcula la ganancia |V<sub>C</sub>/V<sub>s</sub>| y el desfase, y los compara con lo teórico.</p>
+      <p class="actividad">Actividades 6 y 7 de la guía</p>
+      <p>En cada frecuencia, cambia la frecuencia del generador <strong>sin tocar la amplitud</strong> y anota
+         V<sub>in</sub> (CH1), V<sub>out</sub> (CH2) y el retraso Δt de V<sub>out</sub> respecto a V<sub>in</sub>.
+         La página calcula V<sub>out</sub>/V<sub>in</sub> y la fase, y los compara con lo teórico.</p>
 
       <div class="tabla-scroll">
         <table class="tabla-mediciones" id="tabla-ac">
-          <tr><th>Frec.</th><th>CH1 (Vpp)</th><th>CH2 (Vpp)</th><th>Δt (µs)</th><th>Error<span class="teo">|H| · φ</span></th></tr>
-          <tr data-f="100"><td><strong>100&nbsp;Hz</strong><span class="teo">teórico: —</span></td><td><input type="text" inputmode="decimal" class="ch1"></td><td><input type="text" inputmode="decimal" class="ch2"></td><td><input type="text" inputmode="decimal" class="dt"></td><td class="error">—</td></tr>
-          <tr data-f="500"><td><strong>500&nbsp;Hz</strong><span class="teo">teórico: —</span></td><td><input type="text" inputmode="decimal" class="ch1"></td><td><input type="text" inputmode="decimal" class="ch2"></td><td><input type="text" inputmode="decimal" class="dt"></td><td class="error">—</td></tr>
-          <tr data-f="1000"><td><strong>1&nbsp;kHz</strong><span class="teo">teórico: —</span></td><td><input type="text" inputmode="decimal" class="ch1"></td><td><input type="text" inputmode="decimal" class="ch2"></td><td><input type="text" inputmode="decimal" class="dt"></td><td class="error">—</td></tr>
-          <tr data-f="1600"><td><strong>1,6&nbsp;kHz</strong><span class="teo">teórico: —</span></td><td><input type="text" inputmode="decimal" class="ch1"></td><td><input type="text" inputmode="decimal" class="ch2"></td><td><input type="text" inputmode="decimal" class="dt"></td><td class="error">—</td></tr>
-          <tr data-f="5000"><td><strong>5&nbsp;kHz</strong><span class="teo">teórico: —</span></td><td><input type="text" inputmode="decimal" class="ch1"></td><td><input type="text" inputmode="decimal" class="ch2"></td><td><input type="text" inputmode="decimal" class="dt"></td><td class="error">—</td></tr>
-          <tr data-f="10000"><td><strong>10&nbsp;kHz</strong><span class="teo">teórico: —</span></td><td><input type="text" inputmode="decimal" class="ch1"></td><td><input type="text" inputmode="decimal" class="ch2"></td><td><input type="text" inputmode="decimal" class="dt"></td><td class="error">—</td></tr>
+          <tr><th>Frec.<span class="teo">teórico</span></th><th>V<sub>in</sub> (Vpp)</th><th>V<sub>out</sub> (Vpp)</th><th>Δt (µs)</th><th>Error<span class="teo">%&nbsp;·&nbsp;°</span></th></tr>
+          <tr data-f="2460"><td><strong>2,46&nbsp;kHz</strong><span class="teo">—</span></td><td><input type="text" inputmode="decimal" class="ch1"></td><td><input type="text" inputmode="decimal" class="ch2"></td><td><input type="text" inputmode="decimal" class="dt"></td><td class="error">—</td></tr>
+          <tr data-f="24600"><td><strong>24,6&nbsp;kHz</strong><span class="teo">—</span></td><td><input type="text" inputmode="decimal" class="ch1"></td><td><input type="text" inputmode="decimal" class="ch2"></td><td><input type="text" inputmode="decimal" class="dt"></td><td class="error">—</td></tr>
+          <tr data-f="246000"><td><strong>246&nbsp;kHz</strong><span class="teo">—</span></td><td><input type="text" inputmode="decimal" class="ch1"></td><td><input type="text" inputmode="decimal" class="ch2"></td><td><input type="text" inputmode="decimal" class="dt"></td><td class="error">—</td></tr>
         </table>
       </div>
 
       <!-- Consejo que aparece si alguna medición se aleja mucho de la teórica -->
       <div id="aviso-mediciones" class="aviso" hidden>
-        <strong>Alguna medición se aleja de lo teórico</strong> (más de 10&nbsp;% en la ganancia
-        o más de 5° en el desfase). Posible causa:
+        <strong>Alguna medición se aleja de lo teórico</strong> (más de 10&nbsp;% en V<sub>out</sub>/V<sub>in</sub>
+        o más de 5° en la fase). Posible causa:
         <!-- Aquí js/lab4.js escribe una sugerencia por cada fila en rojo -->
         <ul id="diagnostico" class="diagnostico"></ul>
       </div>
 
-      <!-- Guía de errores comunes: cada pregunta se abre al tocarla -->
+      <!-- Errores comunes: la misma tabla de la guía, una pregunta por caso -->
       <div class="errores-comunes">
         <p class="tabla-titulo">¿Algo no cuadra? Errores comunes</p>
         <details>
-          <summary>Al conectar las sondas, el generador o el circuito dejan de funcionar</summary>
-          <p>Seguramente un caimán negro quedó en un punto distinto de la tierra del circuito. Las tierras del
-             osciloscopio y del generador están unidas entre sí, así que eso cortocircuita parte del montaje.
-             Pon los dos caimanes negros en la tierra común.</p>
+          <summary>Las lecturas salen 10 veces mayores o menores a lo esperado</summary>
+          <p>La atenuación del canal no coincide con la punta (×10). En el menú del canal, opción Sonda, ajústela a ×10.</p>
         </details>
         <details>
-          <summary>No se ve la señal o se ve una línea plana</summary>
-          <p>Revisa que el canal esté encendido, que su acoplamiento no esté en GND y que la escala vertical
-             (V/div) no sea demasiado grande o pequeña. Presiona Autoset y luego ajusta.</p>
+          <summary>La señal no se queda quieta en la pantalla</summary>
+          <p>El trigger está en otro canal o con el nivel mal ubicado. Use trigger por flanco, con fuente en el canal
+             medido y nivel cerca de 0&nbsp;V; también puede usar AUTOSET.</p>
         </details>
         <details>
-          <summary>La señal se mueve o no se queda quieta en la pantalla</summary>
-          <p>Ajusta el disparo (trigger): fuente en CH1, flanco de subida y nivel cerca de 0&nbsp;V.</p>
+          <summary>La señal cuadrada de calibración tiene picos o está redondeada</summary>
+          <p>La punta no está compensada. Ajuste el tornillo de compensación hasta que la parte superior quede plana.</p>
         </details>
         <details>
-          <summary>La amplitud sale 10 veces mayor o menor</summary>
-          <p>La sonda está en ×10 y el canal en ×1, o al revés. Pon la misma atenuación en la sonda y en el
-             menú del canal.</p>
+          <summary>Aparece ruido o la señal «salta»</summary>
+          <p>Las tierras están en puntos distintos. Lleve las pinzas de tierra de las dos puntas y la del generador al
+             mismo punto.</p>
         </details>
         <details>
-          <summary>El generador muestra un valor y el osciloscopio el doble</summary>
-          <p>El generador está configurado para una carga de 50&nbsp;Ω. Cámbialo a alta impedancia (High-Z)
-             para que la amplitud que muestra coincida con la real.</p>
+          <summary>V<sub>out</sub> igual a V<sub>in</sub>, o casi cero</summary>
+          <p>Un capacitor o resistor está mal conectado, en cortocircuito o intercambiado. Revise el montaje con la
+             Figura 1 y mida los componentes con el Fluke.</p>
         </details>
         <details>
-          <summary>La amplitud de CH1 baja al subir la frecuencia</summary>
-          <p>Es normal: el generador tiene una resistencia interna de unos 50&nbsp;Ω y el circuito le pide más
-             corriente a frecuencias altas. Por eso se anota CH1 en cada frecuencia y la ganancia se calcula
-             con CH2/CH1.</p>
+          <summary>V<sub>in</sub> cambia al subir la frecuencia</summary>
+          <p>Es normal: la salida del generador tiene impedancia interna y el circuito la carga. Mida siempre V<sub>in</sub>
+             y use la relación V<sub>out</sub>/V<sub>in</sub>.</p>
         </details>
         <details>
-          <summary>CH2 se ve adelantada respecto a CH1, o CH2 es mayor que CH1</summary>
-          <p>En este circuito el voltaje del capacitor siempre es menor y va atrasado. Revisa que no hayas
-             intercambiado los canales y que CH2 esté sobre el capacitor y no sobre el resistor.</p>
+          <summary>V<sub>out</sub> a 246&nbsp;kHz fluctúa o se ve poco clara</summary>
+          <p>La escala vertical es muy grande o hay ruido. Baje los V/div (por ejemplo, 50&nbsp;mV/div) y use la
+             adquisición Promedio o la medición Cyc RMS.</p>
         </details>
         <details>
-          <summary>Cómo medir bien el desfase Δt</summary>
-          <p>Mide el tiempo entre dos cruces por cero en el mismo sentido (las dos señales subiendo). Amplía la
-             base de tiempo (s/div) para leerlo mejor o usa los cursores del osciloscopio.</p>
+          <summary>A 246&nbsp;kHz el Δt es muy pequeño y difícil de leer</summary>
+          <p>Es menor de 1&nbsp;µs. Use una escala horizontal pequeña (250&nbsp;ns/div o menos) y los cursores.</p>
+        </details>
+        <details>
+          <summary>La fase sale con el signo contrario</summary>
+          <p>El Δt se tomó en sentido inverso. Si V<sub>out</sub> cruza por cero después que V<sub>in</sub>, la fase es negativa.</p>
+        </details>
+        <details>
+          <summary>El generador indica una amplitud y el osciloscopio mide otra</summary>
+          <p>El generador está configurado para una carga de 50&nbsp;Ω o de alta impedancia. Ajuste la amplitud mirando
+             el osciloscopio (2,0&nbsp;Vpp en CH1).</p>
         </details>
       </div>
     </section>
@@ -234,28 +271,44 @@
     <!-- 6. COMPARACIÓN -->
     <section id="comparacion" class="seccion">
       <h2>6. Comparación</h2>
-      <label class="campo"><span>Frecuencia de corte en LTspice (Hz)</span>
-        <input type="text" inputmode="decimal" id="fc-ltspice" placeholder="Ej: 1592">
-      </label>
-      <p class="nota">Haz un análisis .ac del circuito en LTspice y busca la frecuencia donde
-         V<sub>C</sub>/V<sub>s</sub> cae a 0,707 (−3&nbsp;dB).</p>
-      <div id="resumen-comparacion">
-        <p>Completa la pre-verificación y al menos dos mediciones para ver la comparación.</p>
+      <p class="actividad">Tablas 3 y 9 de la guía</p>
+      <p>Escribe los resultados de LTspice (Actividad 3). La tabla se completa sola con lo teórico y lo medido;
+         cópiala a la Tabla 9 de la guía.</p>
+      <div class="tabla-scroll">
+        <table class="tabla-comparacion" id="tabla-comparacion">
+          <tr><th></th><th>2,46&nbsp;kHz</th><th>24,6&nbsp;kHz</th><th>246&nbsp;kHz</th></tr>
+          <tr><td>|V<sub>out</sub>/V<sub>in</sub>| teórico</td><td class="c-gteo" data-f="2460">—</td><td class="c-gteo" data-f="24600">—</td><td class="c-gteo" data-f="246000">—</td></tr>
+          <tr><td>|V<sub>out</sub>/V<sub>in</sub>| LTspice</td><td><input type="text" inputmode="decimal" class="sim-g" data-f="2460"></td><td><input type="text" inputmode="decimal" class="sim-g" data-f="24600"></td><td><input type="text" inputmode="decimal" class="sim-g" data-f="246000"></td></tr>
+          <tr><td>|V<sub>out</sub>/V<sub>in</sub>| medido</td><td class="c-gmed" data-f="2460">—</td><td class="c-gmed" data-f="24600">—</td><td class="c-gmed" data-f="246000">—</td></tr>
+          <tr><td>Error (%)</td><td class="c-gerr" data-f="2460">—</td><td class="c-gerr" data-f="24600">—</td><td class="c-gerr" data-f="246000">—</td></tr>
+          <tr><td>Fase teórica (°)</td><td class="c-fteo" data-f="2460">—</td><td class="c-fteo" data-f="24600">—</td><td class="c-fteo" data-f="246000">—</td></tr>
+          <tr><td>Fase LTspice (°)</td><td><input type="text" inputmode="decimal" class="sim-f" data-f="2460"></td><td><input type="text" inputmode="decimal" class="sim-f" data-f="24600"></td><td><input type="text" inputmode="decimal" class="sim-f" data-f="246000"></td></tr>
+          <tr><td>Fase medida (°)</td><td class="c-fmed" data-f="2460">—</td><td class="c-fmed" data-f="24600">—</td><td class="c-fmed" data-f="246000">—</td></tr>
+          <tr><td>Diferencia (°)</td><td class="c-fdif" data-f="2460">—</td><td class="c-fdif" data-f="24600">—</td><td class="c-fdif" data-f="246000">—</td></tr>
+        </table>
       </div>
-      <!-- Gráficas de Bode: ganancia y desfase contra frecuencia -->
+      <button class="boton secundario" id="btn-copiar">Copiar resultados para la guía</button>
+      <p id="estado-copiar" class="nota" hidden></p>
+
+      <div id="resumen-comparacion">
+        <p>Completa el cálculo teórico y al menos dos mediciones para ver los indicadores.</p>
+      </div>
+      <!-- Gráficas: V_out/V_in y fase contra frecuencia (como el análisis AC de LTspice) -->
       <div id="caja-grafica" hidden>
-        <p class="tabla-titulo">Ganancia |V<sub>C</sub>/V<sub>s</sub>|</p>
-        <div class="grafica"><canvas id="grafica-ganancia" aria-label="Ganancia medida y teórica contra frecuencia"></canvas></div>
-        <p class="tabla-titulo">Desfase de V<sub>C</sub> respecto a V<sub>s</sub> (°)</p>
-        <div class="grafica"><canvas id="grafica-fase" aria-label="Desfase medido y teórico contra frecuencia"></canvas></div>
+        <p class="tabla-titulo">|V<sub>out</sub>/V<sub>in</sub>| contra frecuencia</p>
+        <div class="grafica"><canvas id="grafica-ganancia" aria-label="Relación Vout/Vin teórica, simulada y medida contra frecuencia"></canvas></div>
+        <p class="tabla-titulo">Fase de V<sub>out</sub> (°) contra frecuencia</p>
+        <div class="grafica"><canvas id="grafica-fase" aria-label="Fase teórica, simulada y medida contra frecuencia"></canvas></div>
+        <p id="nota-maximo" class="nota"></p>
       </div>
     </section>
 
     <!-- 7. ENVIAR RESULTADOS -->
     <section id="enviar" class="seccion">
       <h2>7. Enviar resultados</h2>
-      <p>Cuando termines, envía tus resultados al registro del proyecto de grado.
-         Solo se envía el código de grupo, nunca nombres.</p>
+      <p>Al terminar, envía tus resultados al registro del proyecto de grado. <strong>El envío hace parte de la
+         nota de la práctica.</strong> Usa el mismo código de grupo que escribiste en la guía; solo se envía el
+         código, nunca nombres.</p>
       <label class="campo"><span>Código de grupo</span>
         <input type="text" id="grupo" placeholder="Ej: G07" maxlength="10" autocapitalize="characters">
       </label>
