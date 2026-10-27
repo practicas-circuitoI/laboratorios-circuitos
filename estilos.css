@@ -463,3 +463,41 @@ footer p { margin: 4px 0; }
 
 /* Pregunta "¿Funcionó a la primera?" dentro de Enviar: espacio antes del código de grupo */
 #enviar .opciones { margin-bottom: 18px; }
+
+/* ===================================================
+   Agregado con el Lab 4 según la guía (Práctica IV)
+   =================================================== */
+
+/* Etiqueta que dice a qué actividad de la guía corresponde cada sección */
+.seccion .actividad {
+  display: inline-block;
+  margin: 0 0 12px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--fondo);
+  color: var(--color);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* Recuadro informativo (convención de fase) */
+.caja-info {
+  background: var(--fondo);
+  color: #1d2230;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin: 14px 0;
+}
+
+/* Tabla 9: filas con lo teórico, LTspice y lo medido */
+.tabla-comparacion th,
+.tabla-comparacion td { padding: 7px 4px; font-size: 14px; font-variant-numeric: tabular-nums; }
+.tabla-comparacion td:first-child { font-weight: 600; color: #1d2230; }
+.tabla-comparacion td input { min-width: 56px; max-width: 80px; padding: 6px 4px; font-size: 15px; text-align: center; }
+
+/* Botón claro (Copiar resultados) */
+.boton.secundario { background: var(--fondo); color: var(--color); margin: 14px 0 6px; }
+
+/* Tabla 2 dentro del resultado: un poco más apretada para que quepa en celular */
+.resultado .tabla-compacta th,
+.resultado .tabla-compacta td { padding: 6px 3px; }
