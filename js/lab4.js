@@ -1,14 +1,14 @@
 // ===================================================
-// Lab 4: Análisis AC (circuito RC medido con osciloscopio)
-// Pre-verificación con fasores, mediciones de ganancia y desfase
-// con alerta y diagnóstico, comparación (frecuencia de corte y
-// gráficas de Bode) y envío al registro.
+// Lab 4: Uso del osciloscopio y análisis en AC (Práctica IV)
+// Circuito: R1‖C1 en serie con R2‖C2; Vout se toma sobre R2‖C2.
+// Cálculo teórico (Tablas 1 y 2), mediciones con alerta y diagnóstico,
+// comparación con LTspice (Tabla 9), gráficas y envío al registro.
 // ===================================================
 
-const POTENCIA_MAX = 0.25;  // W, resistor de 1/4 W
-const VOLTAJE_MAX_C = 50;   // V, voltaje máximo del capacitor (revisar el que usen en el laboratorio)
-const UMBRAL = 10;          // % de error en la ganancia para avisar (definir con la directora)
-const UMBRAL_FASE = 5;      // grados de diferencia en el desfase para avisar (definir con la directora)
+const UMBRAL = 10;          // % de error en Vout/Vin (criterio de la guía)
+const UMBRAL_FASE = 5;      // grados de diferencia en la fase para avisar (definir con la directora)
+const FRECUENCIAS = [2460, 24600, 246000];  // Hz, las tres de la guía
+const F_TABLA1 = 24600;                      // Hz, frecuencia de la Tabla 1
 const CLAVE_EVENTOS = 'eventos-' + location.pathname;
 const filas = document.querySelectorAll('#tabla-ac tr[data-f]');
 let ultimaComparacion = null; // resultados que se envían al registro
@@ -28,24 +28,18 @@ function leerNumeroDe(campo) {
   return Number(texto);
 }
 
-// Número con coma decimal y signo menos tipográfico: -32.1 → "−32,1"
+// Número con coma decimal y signo menos tipográfico: -48.3141 → "−48,314"
 function formato(numero, decimales) {
   return numero.toFixed(decimales).replace('.', ',').replace('-', '−');
 }
 
-// Frecuencia legible: 1591.5 → "1,59 kHz", 500 → "500 Hz" (con espacio que no se separa)
+// Frecuencia legible: 2460 → "2,46 kHz", 246000 → "246 kHz", 1e6 → "1 MHz"
 function formatoFrecuencia(f) {
-  if (f >= 1000) {
-    let texto = (f / 1000).toFixed(2);
-    texto = texto.replace(/0+$/, '').replace(/\.$/, '');
-    return texto.replace('.', ',') + '\u00a0kHz';
-  }
-  return Math.round(f) + '\u00a0Hz';
-}
-
-// Frecuencia de corte en hertz enteros: 1591.5 → "1592 Hz"
-function formatoHz(f) {
-  return Math.round(f) + '\u00a0Hz';
+  let valor = f, unidad = 'Hz';
+  if (f >= 1e6) { valor = f / 1e6; unidad = 'MHz'; }
+  else if (f >= 1000) { valor = f / 1000; unidad = 'kHz'; }
+  let texto = valor.toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
+  return texto.replace('.', ',') + '\u00a0' + unidad;
 }
 
 function redondear(numero, decimales) {
@@ -57,6 +51,8 @@ function redondear(numero, decimales) {
 // Cada número complejo es un objeto con parte real (re) e imaginaria (im)
 
 function complejo(re, im) { return { re: re, im: im }; }
+function sumar(a, b) { return complejo(a.re + b.re, a.im + b.im); }
+function restar(a, b) { return complejo(a.re - b.re, a.im - b.im); }
 function multiplicar(a, b) { return complejo(a.re * b.re - a.im * b.im, a.re * b.im + a.im * b.re); }
 function dividir(a, b) {
   const d = b.re * b.re + b.im * b.im;
@@ -65,46 +61,47 @@ function dividir(a, b) {
 function magnitud(z) { return Math.hypot(z.re, z.im); }                        // abs(z)
 function anguloGrados(z) { return Math.atan2(z.im, z.re) * 180 / Math.PI; }   // angle(z) en grados
 
-// Forma rectangular: "7,16 − j4,50"
+// Forma rectangular: "976,7 − j151,0"
 function textoRectangular(z, decimales) {
   return formato(z.re, decimales) + (z.im < 0 ? '&nbsp;−&nbsp;j' : '&nbsp;+&nbsp;j') + formato(Math.abs(z.im), decimales);
 }
-// Forma polar: "8,47 ∠ −32,1°"
+// Forma polar: "988,3 ∠ −8,788°"
 function textoPolar(z, decimales) {
-  return formato(magnitud(z), decimales) + '&nbsp;∠&nbsp;' + formato(anguloGrados(z), 1) + '°';
+  return formato(magnitud(z), decimales) + '&nbsp;∠&nbsp;' + formato(anguloGrados(z), 3) + '°';
 }
 
 
-// ---------- Datos del circuito ----------
+// ---------- El circuito ----------
 
-// Lee R y C (C se escribe en nF). Devuelve null si falta algo.
-function leerRC() {
-  const R = leerNumero('r');
-  const CnF = leerNumero('c');
-  if (!(R > 0) || !(CnF > 0)) return null;
-  return { R: R, C: CnF * 1e-9, CnF: CnF };
+// Lee R1, C1, R2 y C2 (los capacitores en nF). Devuelve null si falta algo.
+function leerComponentes() {
+  const R1 = leerNumero('r1'), C1 = leerNumero('c1');
+  const R2 = leerNumero('r2'), C2 = leerNumero('c2');
+  if (!(R1 > 0) || !(C1 > 0) || !(R2 > 0) || !(C2 > 0)) return null;
+  return { R1: R1, C1: C1 * 1e-9, R2: R2, C2: C2 * 1e-9, C1nF: C1, C2nF: C2 };
 }
 
-// Lee los cuatro valores de la pre-verificación. Devuelve null si falta algo.
-function leerCircuito() {
-  const rc = leerRC();
-  const Vpp = leerNumero('vpp');
-  const f = leerNumero('frecuencia');
-  if (!rc || !(Vpp > 0) || !(f > 0)) return null;
-  return { Vpp: Vpp, f: f, R: rc.R, C: rc.C, CnF: rc.CnF };
+// Impedancia de un resistor en paralelo con un capacitor: Z = R / (1 + jωRC)
+function paralelo(R, C, f) {
+  return dividir(complejo(R, 0), complejo(1, 2 * Math.PI * f * R * C));
 }
 
-// Respuesta teórica del circuito: H = VC / Vs = 1 / (1 + jωRC)
-function respuesta(f, R, C) {
-  const wRC = 2 * Math.PI * f * R * C;
-  return {
-    ganancia: 1 / Math.sqrt(1 + wRC * wRC),       // |H|
-    fase: -Math.atan(wRC) * 180 / Math.PI         // ángulo de H en grados
-  };
+// Divisor de tensión con impedancias: Vout/Vin = Z2 / (Z1 + Z2)
+function respuesta(f, c) {
+  const Z1 = paralelo(c.R1, c.C1, f);
+  const Z2 = paralelo(c.R2, c.C2, f);
+  const Zeq = sumar(Z1, Z2);
+  const H = dividir(Z2, Zeq);
+  return { Z1: Z1, Z2: Z2, Zeq: Zeq, H: H, ganancia: magnitud(H), fase: anguloGrados(H) };
+}
+
+// Retraso esperado en µs a partir de la fase (positivo = Vout atrasada)
+function retrasoMicro(fase, f) {
+  return -fase / (360 * f) * 1e6;
 }
 
 
-// ---------- 3. Pre-verificación ----------
+// ---------- 3. Cálculo teórico (Tablas 1 y 2) ----------
 
 // Dibuja una flecha de (x1, y1) a (x2, y2) para el diagrama fasorial
 function flecha(x1, y1, x2, y2, color) {
@@ -118,44 +115,36 @@ function flecha(x1, y1, x2, y2, color) {
          '<polygon points="' + x2 + ',' + y2 + ' ' + p1 + ' ' + p2 + '" fill="' + color + '"/>';
 }
 
-// Diagrama fasorial: Vs en el eje, VR adelantado y VC desde la punta de VR hasta la de Vs
-function diagramaFasorial(Vs, VR, VC) {
-  const ox = 24, oy = 172;                 // origen
-  const escala = 270 / magnitud(Vs);       // Vs mide 270 píxeles
-  const px = function (z) { return ox + escala * z.re; };
-  const py = function (z) { return oy - escala * z.im; };
-  const xs = px(Vs), ys = py(Vs);
-  const xr = px(VR), yr = py(VR);
-  const theta = Math.atan2(VR.im, VR.re);
-  const colorVs = '#1d2230', colorVR = '#1d63c4', colorVC = '#c9600f';
+// Diagrama fasorial: Vin en el eje, Vout desde el origen y VZ1 desde la punta de Vout hasta la de Vin
+function diagramaFasorial(Vin, Vout) {
+  const escala = 270 / magnitud(Vin);                    // Vin mide 270 píxeles
+  const arriba = Math.max(0, Vout.im) * escala;           // cuánto sube Vout sobre el eje
+  const abajo = Math.max(0, -Vout.im) * escala;           // cuánto baja Vout bajo el eje
+  const ox = 24, oy = 28 + arriba;                        // origen
+  const alto = oy + abajo + 34;
+  const xs = ox + escala * Vin.re, ys = oy;
+  const xo = ox + escala * Vout.re, yo = oy - escala * Vout.im;
+  const theta = Math.atan2(Vout.im, Vout.re);
+  const colorVin = '#1d2230', colorVout = '#1d63c4', colorZ1 = '#c9600f';
 
-  // Ángulo marcado con un arco en el origen
-  const radio = 42;
-  const arco = 'M' + (ox + radio) + ' ' + oy + ' A' + radio + ' ' + radio + ' 0 0 0 ' +
+  // Ángulo de Vout marcado con un arco en el origen
+  const radio = 46;
+  const arco = 'M' + (ox + radio) + ' ' + oy + ' A' + radio + ' ' + radio + ' 0 0 ' + (theta < 0 ? 1 : 0) + ' ' +
                (ox + radio * Math.cos(theta)) + ' ' + (oy - radio * Math.sin(theta));
-  const xa = ox + (radio + 14) * Math.cos(theta / 2);
-  const ya = oy - (radio + 14) * Math.sin(theta / 2) + 4;
+  const xa = ox + (radio + 10) * Math.cos(theta / 2);
+  const ya = oy - (radio + 10) * Math.sin(theta / 2) + 4;
+  const abajoTexto = theta < 0 ? -12 : 20;
 
-  // Ángulo recto entre VR y VC
-  const ux = -Math.cos(theta), uy = Math.sin(theta);           // de la punta de VR hacia el origen
-  const lv = Math.hypot(xs - xr, ys - yr);
-  const vx = (xs - xr) / lv, vy = (ys - yr) / lv;              // de la punta de VR hacia la de Vs
-  const t = 9;
-  const recto = (xr + t * ux) + ',' + (yr + t * uy) + ' ' +
-                (xr + t * ux + t * vx) + ',' + (yr + t * uy + t * vy) + ' ' +
-                (xr + t * vx) + ',' + (yr + t * vy);
-
-  return '<svg class="fasores" viewBox="0 0 330 200" role="img" aria-label="Diagrama fasorial: Vs, VR y VC">' +
+  return '<svg class="fasores" viewBox="0 0 330 ' + alto + '" role="img" aria-label="Diagrama fasorial: Vin, Vout y VZ1">' +
     '<line x1="' + ox + '" y1="' + oy + '" x2="316" y2="' + oy + '" stroke="#c9ced9" stroke-width="1"/>' +
     '<path d="' + arco + '" fill="none" stroke="#7a8194" stroke-width="1.5"/>' +
-    '<text x="' + xa + '" y="' + ya + '" fill="#4a5164" font-size="12">' + formato(theta * 180 / Math.PI, 1) + '°</text>' +
-    '<polyline points="' + recto + '" fill="none" stroke="#7a8194" stroke-width="1.5"/>' +
-    flecha(ox, oy, xs, ys, colorVs) +
-    flecha(ox, oy, xr, yr, colorVR) +
-    flecha(xr, yr, xs, ys, colorVC) +
-    '<text x="' + (ox + xs) / 2 + '" y="' + (oy + 20) + '" fill="' + colorVs + '" text-anchor="middle">V<tspan dy="4" font-size="11">s</tspan></text>' +
-    '<text x="' + ((ox + xr) / 2 - 10) + '" y="' + ((oy + yr) / 2 - 6) + '" fill="' + colorVR + '" text-anchor="end">V<tspan dy="4" font-size="11">R</tspan></text>' +
-    '<text x="' + ((xr + xs) / 2 + 10) + '" y="' + ((yr + ys) / 2 - 6) + '" fill="' + colorVC + '">V<tspan dy="4" font-size="11">C</tspan></text>' +
+    '<text x="' + xa + '" y="' + ya + '" fill="#4a5164" font-size="12">' + formato(theta * 180 / Math.PI, 3) + '°</text>' +
+    flecha(ox, oy, xs, ys, colorVin) +
+    flecha(ox, oy, xo, yo, colorVout) +
+    flecha(xo, yo, xs, ys, colorZ1) +
+    '<text x="' + (ox + xs) / 2 + '" y="' + (oy + abajoTexto) + '" fill="' + colorVin + '" text-anchor="middle">V<tspan dy="4" font-size="11">in</tspan></text>' +
+    '<text x="' + ((ox + xo) / 2 - 12) + '" y="' + ((oy + yo) / 2 + 4) + '" fill="' + colorVout + '" text-anchor="end">V<tspan dy="4" font-size="11">out</tspan></text>' +
+    '<text x="' + ((xo + xs) / 2 + 10) + '" y="' + ((yo + ys) / 2 + 16) + '" fill="' + colorZ1 + '">V<tspan dy="4" font-size="11">Z1</tspan></text>' +
   '</svg>';
 }
 
@@ -163,75 +152,62 @@ function verificar() {
   const caja = document.getElementById('resultado-pre');
   caja.hidden = false;
 
-  const c = leerCircuito();
-  if (!c) {
+  const c = leerComponentes();
+  const Vpp = leerNumero('vpp');
+  if (!c || !(Vpp > 0)) {
     caja.className = 'resultado peligro';
-    caja.innerHTML = '<p>Completa los cuatro valores con números mayores que cero, por ejemplo 10, 1000, 1000 y 100.</p>';
+    caja.innerHTML = '<p>Completa los cinco valores con números mayores que cero, por ejemplo 1000, 1, 10000, 10 y 2.</p>';
     return;
   }
 
-  // 1. Impedancia y fasores a la frecuencia escrita (amplitudes pico a pico, Vs como referencia)
-  const w = 2 * Math.PI * c.f;
-  const Xc = 1 / (w * c.C);                         // reactancia del capacitor (Ω)
-  const fc = 1 / (2 * Math.PI * c.R * c.C);         // frecuencia de corte (Hz)
-  const Z = complejo(c.R, -Xc);                     // Z = R − jXc
-  const Vs = complejo(c.Vpp, 0);
-  const I = dividir(Vs, Z);                         // A pico a pico
-  const VR = multiplicar(I, complejo(c.R, 0));      // VR = I·R
-  const VC = multiplicar(I, complejo(0, -Xc));      // VC = I·(−jXc)
-  const ImA = complejo(I.re * 1000, I.im * 1000);   // corriente en mA
-  const retraso = -anguloGrados(VC) / (360 * c.f) * 1e6; // µs que CH2 va detrás de CH1
+  // Tabla 1: análisis a 24,6 kHz con Vin = (Vpp/2)∠0° (amplitud, como en la guía)
+  const f = F_TABLA1;
+  const w = 2 * Math.PI * f;
+  const Xc1 = 1 / (w * c.C1);
+  const Xc2 = 1 / (w * c.C2);
+  const r = respuesta(f, c);
+  const Vin = complejo(Vpp / 2, 0);
+  const Vout = multiplicar(Vin, r.H);
+  const VZ1 = restar(Vin, Vout);
 
-  // 2. Seguridad: el peor caso para R es a frecuencia muy alta (C actúa como un corto)
-  //    y para C es a frecuencia muy baja (recibe todo el voltaje del generador)
-  const Vrms = c.Vpp / (2 * Math.SQRT2);
-  const Pmax = Vrms * Vrms / c.R;
-  const porcentaje = Pmax / POTENCIA_MAX * 100;
-  const Vpico = c.Vpp / 2;
+  const fila1 = function (nombre, valor) { return '<tr><td>' + nombre + '</td><td>' + valor + '</td></tr>'; };
+  const impedancia = function (z) { return textoRectangular(z, 1) + ' = ' + textoPolar(z, 1); };
 
-  let estado;
-  let mensaje;
-  if (Pmax > POTENCIA_MAX) {
-    estado = 'peligro';
-    mensaje = 'No enciendas el generador: el resistor se puede sobrecalentar a frecuencias altas. Baja la amplitud.';
-  } else if (Vpico > VOLTAJE_MAX_C) {
-    estado = 'peligro';
-    mensaje = 'No enciendas el generador: el capacitor recibiría más de ' + VOLTAJE_MAX_C + '&nbsp;V. Baja la amplitud.';
-  } else if (porcentaje > 50) {
-    estado = 'precaucion';
-    mensaje = 'Puedes medir, pero el resistor se va a calentar a frecuencias altas. Mide rápido o baja la amplitud.';
-  } else {
-    estado = 'ok';
-    mensaje = 'Valores seguros. Puedes armar el circuito.';
-  }
+  // Tabla 2: las tres frecuencias
+  let filas2 = '';
+  FRECUENCIAS.forEach(function (fr) {
+    const t = respuesta(fr, c);
+    filas2 += '<tr><td>' + formatoFrecuencia(fr) + '</td><td>' + formato(t.ganancia, 4) + '</td><td>' +
+              formato(t.fase, 3) + '</td><td>' + formato(t.ganancia * Vpp, 3) + '</td><td>' +
+              formato(retrasoMicro(t.fase, fr), 3) + '</td></tr>';
+  });
 
-  const fila = function (nombre, z) {
-    return '<tr><td>' + nombre + '</td><td>' + textoRectangular(z, 2) + '</td><td>' + textoPolar(z, 2) + '</td></tr>';
-  };
-
-  caja.className = 'resultado ' + estado;
+  caja.className = 'resultado ok';
   caja.innerHTML =
-    '<p><strong>' + mensaje + '</strong></p>' +
-    '<ul>' +
-      '<li>Frecuencia de corte: f<sub>c</sub> = 1/(2πRC) = ' + formatoHz(fc) + '</li>' +
-      '<li>A ' + formatoFrecuencia(c.f) + ': X<sub>C</sub> = ' + formato(Xc, 0) + '&nbsp;Ω y ' +
-          'Z = ' + textoRectangular(Z, 0) + ' = ' + textoPolar(Z, 0) + '&nbsp;Ω</li>' +
-      '<li>Potencia máxima en el resistor: ' + formato(Pmax * 1000, 1) + '&nbsp;mW (' + formato(porcentaje, 0) + '&nbsp;% de 0,25&nbsp;W)</li>' +
-    '</ul>' +
-    '<p>Fasores a ' + formatoFrecuencia(c.f) + ' (valores pico a pico, V<sub>s</sub> como referencia):</p>' +
+    '<p><strong>Tabla 1. Resultados teóricos a ' + formatoFrecuencia(f) + '</strong> (V<sub>in</sub> = ' +
+       formato(Vpp / 2, 3) + '&nbsp;∠&nbsp;0°&nbsp;V)</p>' +
     '<div class="tabla-scroll"><table>' +
-      '<tr><th>Fasor</th><th>Rectangular</th><th>Polar</th></tr>' +
-      fila('V<sub>s</sub> (V)', Vs) +
-      fila('I (mA)', ImA) +
-      fila('V<sub>R</sub> (V)', VR) +
-      fila('V<sub>C</sub> (V)', VC) +
+      '<tr><th>Magnitud</th><th>Resultado</th></tr>' +
+      fila1('X<sub>C1</sub> (Ω)', formato(Xc1, 1)) +
+      fila1('X<sub>C2</sub> (Ω)', formato(Xc2, 1)) +
+      fila1('Z<sub>1</sub> (Ω)', impedancia(r.Z1)) +
+      fila1('Z<sub>2</sub> (Ω)', impedancia(r.Z2)) +
+      fila1('Z<sub>eq</sub> (Ω)', impedancia(r.Zeq)) +
+      fila1('Magnitud de V<sub>out</sub> (V)', formato(magnitud(Vout), 4)) +
+      fila1('Fase de V<sub>out</sub> (°)', formato(anguloGrados(Vout), 3)) +
+      fila1('V<sub>out</sub> pico a pico (V)', formato(2 * magnitud(Vout), 4)) +
     '</table></div>' +
-    diagramaFasorial(Vs, VR, VC) +
-    '<p><strong>En el osciloscopio</strong> deberías ver CH2 con unos ' + formato(magnitud(VC), 2) + '&nbsp;Vpp, ' +
-       'atrasada ' + formato(retraso, 0) + '&nbsp;µs (' + formato(anguloGrados(VC), 1) + '°) respecto a CH1.</p>' +
-    '<p>Ojo: |V<sub>R</sub>| + |V<sub>C</sub>| = ' + formato(magnitud(VR) + magnitud(VC), 2) + '&nbsp;Vpp, más que los ' +
-       formato(c.Vpp, 2) + '&nbsp;Vpp del generador. En AC los voltajes se suman como fasores ' +
-       '(V<sub>R</sub> + V<sub>C</sub> = V<sub>s</sub>), no como números.</p>';
+    diagramaFasorial(Vin, Vout) +
+    '<p>V<sub>in</sub> = V<sub>Z1</sub> + V<sub>out</sub> como fasores. Ojo: |V<sub>Z1</sub>| + |V<sub>out</sub>| = ' +
+       formato(magnitud(VZ1) + magnitud(Vout), 3) + '&nbsp;V, distinto de |V<sub>in</sub>| = ' + formato(Vpp / 2, 3) +
+       '&nbsp;V: en AC los voltajes no se suman como números.</p>' +
+    '<p><strong>Tabla 2. Respuesta teórica a tres frecuencias</strong></p>' +
+    '<div class="tabla-scroll"><table class="tabla-compacta">' +
+      '<tr><th>Frec.</th><th>|V<sub>out</sub>/V<sub>in</sub>|</th><th>Fase<br>(°)</th><th>V<sub>out</sub><br>(Vpp)</th><th>Δt<br>(µs)</th></tr>' +
+      filas2 +
+    '</table></div>' +
+    '<p>Las columnas V<sub>out</sub> y Δt son lo que deberías ver en el osciloscopio con ' + formato(Vpp, 2) +
+       '&nbsp;Vpp en CH1.</p>';
 }
 
 
@@ -252,20 +228,20 @@ function registrarEvento(tipo, frecuencia) {
   } catch (error) {}
 }
 
-// Lee la medición de una fila. Devuelve null si faltan CH1 o CH2.
+// Lee la medición de una fila. Devuelve null si faltan Vin o Vout.
 function medicionDe(fila) {
-  const ch1 = leerNumeroDe(fila.querySelector('.ch1'));
-  const ch2 = leerNumeroDe(fila.querySelector('.ch2'));
+  const vin = leerNumeroDe(fila.querySelector('.ch1'));
+  const vout = leerNumeroDe(fila.querySelector('.ch2'));
   const dt = leerNumeroDe(fila.querySelector('.dt'));
-  if (isNaN(ch1) || isNaN(ch2)) return null;
+  if (isNaN(vin) || isNaN(vout)) return null;
   const f = Number(fila.dataset.f);
   return {
     f: f,
-    ch1: ch1,
-    ch2: ch2,
+    vin: vin,
+    vout: vout,
     dt: isNaN(dt) ? null : dt,
-    ganancia: ch1 > 0 ? ch2 / ch1 : NaN,                 // |VC / Vs| medida
-    fase: isNaN(dt) ? null : -360 * f * dt / 1e6         // grados (negativo = atrasada)
+    ganancia: vin > 0 ? vout / vin : NaN,                 // Vout/Vin medida
+    fase: isNaN(dt) ? null : -360 * f * dt / 1e6          // grados (negativo = atrasada)
   };
 }
 
@@ -275,42 +251,53 @@ function cerca(x, valor, tolerancia) {
 }
 
 // Elige la causa más probable según cómo es el error
-function diagnosticar(m, teo, rc) {
-  if (!(m.ch1 > 0) || m.ch2 <= 0.02 * m.ch1) {
-    return 'Un canal marca casi cero: revisa que la sonda esté en su punto, que el canal esté encendido y que su acoplamiento no esté en GND.';
+function diagnosticar(m, teo, c) {
+  if (!(m.vin > 0) || m.vout <= 0.02 * m.vin) {
+    return 'Un canal marca casi cero: revisa que la punta esté en su punto, que el canal esté encendido y que el circuito no tenga un elemento en corto (mídelo con el Fluke).';
   }
   const r = m.ganancia / teo.ganancia;
-  if (cerca(r, 10, 0.3) || cerca(r, 0.1, 0.3)) {
-    return 'La ganancia es unas 10 veces mayor o menor: la atenuación de una sonda (×1 o ×10) no coincide con la de su canal.';
+  const msjSonda = 'La relación es unas 10 veces mayor o menor: la atenuación de un canal no coincide con la punta (×10). En el menú del canal, opción Sonda, ajústela a ×10.';
+  if (cerca(r, 10, 0.3)) return msjSonda;
+  if (m.ganancia > 1.05) {
+    return 'V<sub>out</sub> no puede ser mayor que V<sub>in</sub> en este circuito: revisa que no hayas intercambiado los canales (CH1 en la entrada y CH2 en la salida).';
   }
+  if (m.ganancia >= 0.97) {
+    return 'V<sub>out</sub> es casi igual a V<sub>in</sub>: un capacitor o resistor está mal conectado o en cortocircuito. Revisa el montaje con la Figura 1 y mide los componentes con el Fluke.';
+  }
+  // ¿Coincide con el circuito armado con elementos intercambiados?
+  const cambios = [
+    { texto: 'R<sub>1</sub> y R<sub>2</sub> intercambiadas', c: { R1: c.R2, C1: c.C1, R2: c.R1, C2: c.C2 } },
+    { texto: 'C<sub>1</sub> y C<sub>2</sub> intercambiados', c: { R1: c.R1, C1: c.C2, R2: c.R2, C2: c.C1 } },
+    { texto: 'las dos redes R‖C intercambiadas', c: { R1: c.R2, C1: c.C2, R2: c.R1, C2: c.C1 } }
+  ];
+  for (let i = 0; i < cambios.length; i++) {
+    if (cerca(m.ganancia, respuesta(m.f, cambios[i].c).ganancia, 0.06) && !cerca(m.ganancia, teo.ganancia, 0.1)) {
+      return 'Lo medido coincide con el circuito armado con ' + cambios[i].texto + '. Revisa el montaje con la Figura 1 y el código de colores. ' +
+             'Si el montaje está bien, revisa que los dos canales estén en ×10 y que anotaste los dos valores en Vpp.';
+    }
+  }
+  if (cerca(r, 0.1, 0.3)) return msjSonda;
   if (cerca(r, 2, 0.15) || cerca(r, 0.5, 0.15)) {
-    return 'La ganancia es casi el doble o la mitad: parece que en un canal anotaste el valor pico (Vp) y en el otro el pico a pico (Vpp). Anota los dos en Vpp.';
+    return 'La relación es casi el doble o la mitad: parece que en un canal anotaste el valor pico (Vp) y en el otro el pico a pico (Vpp). Anota los dos en Vpp.';
   }
   if (cerca(r, 2.83, 0.1) || cerca(r, 0.354, 0.1)) {
-    return 'Parece que en un canal anotaste el valor eficaz (Vrms) y en el otro el pico a pico (Vpp). Anota los dos en Vpp.';
-  }
-  if (m.ganancia > 1.05) {
-    return 'CH2 no puede ser mayor que CH1 en este circuito: revisa que no hayas intercambiado los canales (CH1 en el generador y CH2 en el capacitor).';
-  }
-  const wRC = 2 * Math.PI * m.f * rc.R * rc.C;
-  const gananciaR = wRC / Math.sqrt(1 + wRC * wRC);   // lo que mediría CH2 sobre el resistor
-  if (cerca(m.ganancia, gananciaR, 0.1) && !cerca(m.ganancia, teo.ganancia, 0.1)) {
-    return 'Parece que CH2 está midiendo el resistor y no el capacitor. Pon la punta de CH2 entre R y C, con su caimán en la tierra común.';
+    return 'Parece que en un canal anotaste el valor rms y en el otro el pico a pico (Vpp). Anota los dos en Vpp.';
   }
   if (m.fase !== null) {
     if (m.dt < 0) {
-      return 'El Δt salió negativo: en este circuito el voltaje del capacitor va atrasado. Anota el retraso de CH2 como número positivo y revisa que no hayas intercambiado los canales.';
+      return 'El Δt salió negativo: en este circuito V<sub>out</sub> va atrasada. Si V<sub>out</sub> cruza por cero después que V<sub>in</sub>, anota Δt positivo (la fase queda negativa).';
     }
     const rf = m.fase / teo.fase;
     if (cerca(rf, 1000, 0.3) || cerca(rf, 0.001, 0.3)) {
-      return 'El desfase es unas 1000 veces mayor o menor: escribe Δt en microsegundos (µs).';
+      return 'La fase es unas 1000 veces mayor o menor: escribe Δt en microsegundos (µs).';
     }
   }
   const errorGanancia = Math.abs(m.ganancia - teo.ganancia) / teo.ganancia * 100;
   if (errorGanancia > UMBRAL) {
-    return 'La ganancia no coincide con la teórica: revisa la frecuencia real del generador, los valores reales de R y C (el capacitor puede tener 10 o 20 % de tolerancia) y que las tierras estén en el mismo punto.';
+    return 'V<sub>out</sub>/V<sub>in</sub> no coincide: revisa la tolerancia de los componentes (usa los valores medidos de la Tabla 5 en la sección 3), la frecuencia real del generador y la carga de las puntas. Si sigue igual, actualiza LTspice con los valores medidos.';
   }
-  return 'El desfase no coincide: mide Δt entre dos cruces por cero en el mismo sentido (las dos señales subiendo), amplía la base de tiempo o usa los cursores.';
+  return 'La fase no coincide: mide Δt entre dos cruces por cero en el mismo sentido, con los cursores y una escala horizontal pequeña' +
+         (m.f >= 100000 ? ' (a 246&nbsp;kHz usa 250&nbsp;ns/div o menos).' : '.');
 }
 
 function chip(bien, texto) {
@@ -323,35 +310,35 @@ function revisarFila(fila, registrar) {
   const celdaError = fila.querySelector('.error');
   const estabaEnAlerta = fila.classList.contains('alerta');
   const f = Number(fila.dataset.f);
-  const rc = leerRC();
+  const c = leerComponentes();
   let alerta = false;
   fila.dataset.diagnostico = '';
 
-  if (!rc) {
-    celdaTeo.textContent = 'teórico: —';
+  if (!c) {
+    celdaTeo.textContent = '—';
     celdaError.textContent = '—';
   } else {
-    const teo = respuesta(f, rc.R, rc.C);
-    celdaTeo.innerHTML = '|H| ' + formato(teo.ganancia, 3) + '<br>φ ' + formato(teo.fase, 1) + '°';
+    const teo = respuesta(f, c);
+    celdaTeo.innerHTML = formato(teo.ganancia, 4) + '<br>' + formato(teo.fase, 3) + '°';
     const m = medicionDe(fila);
     if (!m) {
       celdaError.textContent = '—';
-    } else if (!(m.ch1 > 0)) {
-      celdaError.innerHTML = chip(false, 'CH1 = 0');
+    } else if (!(m.vin > 0)) {
+      celdaError.innerHTML = chip(false, 'V<sub>in</sub>&nbsp;=&nbsp;0');
       alerta = true;
-      fila.dataset.diagnostico = diagnosticar(m, teo, rc);
+      fila.dataset.diagnostico = diagnosticar(m, teo, c);
     } else {
-      // Error de la ganancia (%) y diferencia del desfase (grados)
+      // Error de Vout/Vin (%) y diferencia de la fase (grados)
       const errorG = Math.abs(m.ganancia - teo.ganancia) / teo.ganancia * 100;
       let html = chip(errorG <= UMBRAL, (errorG > 999 ? '>999' : formato(errorG, 1)) + '&nbsp;%');
       if (errorG > UMBRAL) alerta = true;
       if (m.fase !== null) {
         const difFase = Math.abs(m.fase - teo.fase);
-        html += chip(difFase <= UMBRAL_FASE, formato(difFase, 1) + '°');
+        html += chip(difFase <= UMBRAL_FASE, (difFase > 999 ? '>999' : formato(difFase, 3)) + '°');
         if (difFase > UMBRAL_FASE) alerta = true;
       }
       celdaError.innerHTML = html;
-      if (alerta) fila.dataset.diagnostico = diagnosticar(m, teo, rc);
+      if (alerta) fila.dataset.diagnostico = diagnosticar(m, teo, c);
     }
   }
 
@@ -377,32 +364,59 @@ function mostrarAvisoMediciones() {
 }
 
 
-// ---------- 6. Comparación ----------
+// ---------- 6. Comparación (Tabla 9) ----------
 
-// Escribe las frecuencias del eje logarítmico: 100 Hz, 1 kHz, 10 kHz...
+// Valor de LTspice escrito para una frecuencia ('sim-g' = Vout/Vin, 'sim-f' = fase)
+function valorSim(clase, f) {
+  return leerNumeroDe(document.querySelector('.' + clase + '[data-f="' + f + '"]'));
+}
+
+// Escribe en una celda de la Tabla 9
+function celda(clase, f, html) {
+  document.querySelector('.' + clase + '[data-f="' + f + '"]').innerHTML = html;
+}
+
+// Marca del eje de frecuencias: solo potencias de 10 (100 Hz, 1 kHz, ...)
 function marcaFrecuencia(valor) {
   const exponente = Math.log10(valor);
   if (Math.abs(exponente - Math.round(exponente)) > 1e-6) return '';
   return formatoFrecuencia(valor);
 }
 
-// Curva teórica con 61 puntos entre 50 Hz y 20 kHz
-function curvaTeorica(rc, campo) {
+// Curva teórica entre 100 Hz y 10 MHz (como el análisis AC de LTspice)
+function curvaTeorica(c, campo) {
   const puntos = [];
-  for (let i = 0; i <= 60; i++) {
-    const f = 50 * Math.pow(400, i / 60);
-    puntos.push({ x: f, y: respuesta(f, rc.R, rc.C)[campo] });
+  for (let i = 0; i <= 100; i++) {
+    const f = 100 * Math.pow(10, 5 * i / 100);
+    puntos.push({ x: f, y: respuesta(f, c)[campo] });
   }
   return puntos;
 }
 
-// Crea (o actualiza) una gráfica con los puntos medidos, la curva teórica y la línea de fc
-function graficar(grafica, idCanvas, medidos, teoricos, fc, minY, maxY, decimales) {
-  const lineaFc = [{ x: fc, y: minY }, { x: fc, y: maxY }];
+// Frecuencia donde Vout se atrasa más (para "Para profundizar")
+function faseMaxima(c) {
+  let mejor = { f: 100, fase: 0 };
+  for (let i = 0; i <= 2000; i++) {
+    const f = 100 * Math.pow(10, 5 * i / 2000);
+    const fase = respuesta(f, c).fase;
+    if (fase < mejor.fase) mejor = { f: f, fase: fase };
+  }
+  // Afinar alrededor del mejor punto (búsqueda ternaria en escala logarítmica)
+  let a = Math.log10(mejor.f) - 0.003, b = Math.log10(mejor.f) + 0.003;
+  for (let i = 0; i < 60; i++) {
+    const m1 = a + (b - a) / 3, m2 = b - (b - a) / 3;
+    if (respuesta(Math.pow(10, m1), c).fase < respuesta(Math.pow(10, m2), c).fase) b = m2; else a = m1;
+  }
+  const f = Math.pow(10, (a + b) / 2);
+  return { f: f, fase: respuesta(f, c).fase };
+}
+
+// Crea (o actualiza) una gráfica con lo teórico, LTspice y lo medido
+function graficar(grafica, idCanvas, teoricos, simulados, medidos, minY, maxY, decimales) {
   if (grafica) {
-    grafica.data.datasets[0].data = medidos;
-    grafica.data.datasets[1].data = teoricos;
-    grafica.data.datasets[2].data = lineaFc;
+    grafica.data.datasets[0].data = teoricos;
+    grafica.data.datasets[1].data = simulados;
+    grafica.data.datasets[2].data = medidos;
     grafica.options.scales.y.min = minY;
     grafica.options.scales.y.max = maxY;
     grafica.update();
@@ -415,19 +429,19 @@ function graficar(grafica, idCanvas, medidos, teoricos, fc, minY, maxY, decimale
     type: 'scatter',
     data: {
       datasets: [
-        { label: 'Medido', data: medidos, backgroundColor: estilo.getPropertyValue('--color').trim(),
-          borderColor: '#ffffff', borderWidth: 2, pointRadius: 6, pointHoverRadius: 8 },
         { label: 'Teórico', data: teoricos, type: 'line', borderColor: '#7a8194', borderWidth: 2,
-          borderDash: [6, 4], pointRadius: 0, fill: false },
-        { label: 'fc teórica', data: lineaFc, type: 'line', borderColor: '#c9ced9', borderWidth: 2,
-          pointRadius: 0, fill: false }
+          borderDash: [6, 4], pointRadius: 0, fill: false, order: 3 },
+        { label: 'LTspice', data: simulados, backgroundColor: '#ffffff', borderColor: '#7a8194',
+          borderWidth: 2, pointStyle: 'rectRot', pointRadius: 8, pointHoverRadius: 10, order: 2 },
+        { label: 'Medido', data: medidos, backgroundColor: estilo.getPropertyValue('--color').trim(),
+          borderColor: '#ffffff', borderWidth: 2, pointRadius: 5, pointHoverRadius: 7, order: 1 }
       ]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       scales: {
-        x: { type: 'logarithmic', min: 50, max: 20000, title: { display: true, text: 'Frecuencia' },
+        x: { type: 'logarithmic', min: 100, max: 1e7, title: { display: true, text: 'Frecuencia' },
              ticks: { callback: marcaFrecuencia, autoSkip: false, maxRotation: 0 }, grid: { color: '#eef0f4' } },
         y: { min: minY, max: maxY, grid: { color: '#eef0f4' } }
       },
@@ -448,64 +462,62 @@ function graficar(grafica, idCanvas, medidos, teoricos, fc, minY, maxY, decimale
 function actualizarComparacion() {
   const resumen = document.getElementById('resumen-comparacion');
   const cajaGrafica = document.getElementById('caja-grafica');
-  const rc = leerRC();
+  const c = leerComponentes();
 
-  // Reunir las mediciones completas
-  const puntos = [];
-  filas.forEach(function (fila) {
+  // 1. Llenar la Tabla 9, frecuencia por frecuencia
+  const medidos = [];
+  FRECUENCIAS.forEach(function (f) {
+    const fila = document.querySelector('#tabla-ac tr[data-f="' + f + '"]');
     const m = medicionDe(fila);
-    if (rc && m && m.ch1 > 0) {
-      const teo = respuesta(m.f, rc.R, rc.C);
+    const teo = c ? respuesta(f, c) : null;
+    celda('c-gteo', f, teo ? formato(teo.ganancia, 4) : '—');
+    celda('c-fteo', f, teo ? formato(teo.fase, 3) : '—');
+    celda('c-gmed', f, m && m.vin > 0 ? formato(m.ganancia, 4) : '—');
+    celda('c-fmed', f, m && m.fase !== null ? formato(m.fase, 3) : '—');
+    if (teo && m && m.vin > 0) {
       m.errorG = Math.abs(m.ganancia - teo.ganancia) / teo.ganancia * 100;
       m.difFase = m.fase === null ? null : Math.abs(m.fase - teo.fase);
-      puntos.push(m);
+      celda('c-gerr', f, chip(m.errorG <= UMBRAL, (m.errorG > 999 ? '>999' : formato(m.errorG, 1))));
+      celda('c-fdif', f, m.difFase === null ? '—' : chip(m.difFase <= UMBRAL_FASE, m.difFase > 999 ? '>999' : formato(m.difFase, 3)));
+      const simG = valorSim('sim-g', f);
+      m.errorSim = simG > 0 ? Math.abs(m.ganancia - simG) / simG * 100 : null;
+      medidos.push(m);
+    } else {
+      celda('c-gerr', f, '—');
+      celda('c-fdif', f, '—');
     }
   });
 
-  if (!rc || puntos.length < 2) {
-    resumen.innerHTML = '<p>Completa R y C en la pre-verificación y al menos dos mediciones para ver la comparación.</p>';
+  if (!c || medidos.length < 2) {
+    resumen.innerHTML = '<p>Completa el cálculo teórico y al menos dos mediciones para ver los indicadores.</p>';
     cajaGrafica.hidden = true;
     ultimaComparacion = null;
     return;
   }
 
-  // Error de la ganancia: promedio y máximo
-  let suma = 0;
-  let peor = puntos[0];
-  puntos.forEach(function (p) {
-    suma += p.errorG;
-    if (p.errorG > peor.errorG) peor = p;
+  // 2. Indicadores
+  let suma = 0, peor = medidos[0];
+  medidos.forEach(function (m) {
+    suma += m.errorG;
+    if (m.errorG > peor.errorG) peor = m;
   });
-  const promedio = suma / puntos.length;
-
-  // Diferencia promedio del desfase (solo filas con Δt)
-  const conFase = puntos.filter(function (p) { return p.difFase !== null; });
-  const promedioFase = conFase.length > 0
-    ? conFase.reduce(function (a, p) { return a + p.difFase; }, 0) / conFase.length
+  const promedio = suma / medidos.length;
+  const conFase = medidos.filter(function (m) { return m.difFase !== null; });
+  let promedioFase = null, peorFase = null;
+  if (conFase.length > 0) {
+    promedioFase = conFase.reduce(function (a, m) { return a + m.difFase; }, 0) / conFase.length;
+    peorFase = conFase.reduce(function (a, m) { return m.difFase > a.difFase ? m : a; });
+  }
+  const conSim = medidos.filter(function (m) { return m.errorSim !== null; });
+  const promedioSim = conSim.length > 0
+    ? conSim.reduce(function (a, m) { return a + m.errorSim; }, 0) / conSim.length
     : null;
-
-  // Frecuencia de corte experimental a partir de la ganancia:
-  // |H| = 1/√(1 + (2πfτ)²)  →  τ = √(1/|H|² − 1) / (2πf),  fc = 1/(2πτ)
-  // Promedio ponderado: pesan más las mediciones cerca y por encima de fc, donde el cálculo es más preciso
-  let sumaPesos = 0;
-  let sumaLog = 0;
-  puntos.forEach(function (p) {
-    if (p.ganancia > 0.05 && p.ganancia < 0.98) {
-      const tau = Math.sqrt(1 / (p.ganancia * p.ganancia) - 1) / (2 * Math.PI * p.f);
-      const peso = Math.pow(1 - p.ganancia * p.ganancia, 2);
-      sumaLog += peso * Math.log(tau);
-      sumaPesos += peso;
-    }
-  });
-  const fcExp = sumaPesos > 0 ? 1 / (2 * Math.PI * Math.exp(sumaLog / sumaPesos)) : null;
-  const fcTeo = 1 / (2 * Math.PI * rc.R * rc.C);
-  const fcSim = leerNumero('fc-ltspice');
-  const difTeo = fcExp === null ? null : Math.abs(fcExp - fcTeo) / fcTeo * 100;
-  const difSim = fcExp === null || !(fcSim > 0) ? null : Math.abs(fcExp - fcSim) / fcSim * 100;
+  const en24 = medidos.filter(function (m) { return m.f === F_TABLA1; })[0];
 
   ultimaComparacion = {
     promedio: promedio, maximo: peor.errorG, promedioFase: promedioFase,
-    fcExp: fcExp, fcTeo: fcTeo, fcSim: fcSim > 0 ? fcSim : null, difTeo: difTeo, difSim: difSim
+    maximoFase: peorFase ? peorFase.difFase : null, promedioSim: promedioSim,
+    ganancia24: en24 ? en24.ganancia : null
   };
 
   const texto = function (valor, decimales, unidad) {
@@ -513,29 +525,40 @@ function actualizarComparacion() {
   };
   resumen.innerHTML =
     '<ul class="indicadores">' +
-      '<li><span>Error promedio de la ganancia</span><strong>' + texto(promedio, 1, '%') + '</strong></li>' +
+      '<li><span>Error promedio de V<sub>out</sub>/V<sub>in</sub></span><strong>' + texto(promedio, 1, '%') + '</strong></li>' +
       '<li><span>Error máximo (a ' + formatoFrecuencia(peor.f) + ')</span><strong>' + texto(peor.errorG, 1, '%') + '</strong></li>' +
-      '<li><span>Diferencia promedio del desfase</span><strong>' + texto(promedioFase, 1, '°') + '</strong></li>' +
-      '<li><span>f<sub>c</sub> experimental</span><strong>' + (fcExp === null ? '—' : formatoHz(fcExp)) + '</strong></li>' +
-      '<li><span>Diferencia con f<sub>c</sub> teórica (' + formatoHz(fcTeo) + ')</span><strong>' + texto(difTeo, 1, '%') + '</strong></li>' +
-      '<li><span>Diferencia con f<sub>c</sub> de LTspice' + (fcSim > 0 ? ' (' + formatoHz(fcSim) + ')' : '') + '</span><strong>' + texto(difSim, 1, '%') + '</strong></li>' +
+      '<li><span>Diferencia promedio de fase</span><strong>' + texto(promedioFase, 3, '°') + '</strong></li>' +
+      '<li><span>Diferencia máxima de fase' + (peorFase ? ' (a ' + formatoFrecuencia(peorFase.f) + ')' : '') + '</span><strong>' +
+         texto(peorFase ? peorFase.difFase : null, 3, '°') + '</strong></li>' +
+      '<li><span>V<sub>out</sub>/V<sub>in</sub> medido a 24,6&nbsp;kHz</span><strong>' + (en24 ? formato(en24.ganancia, 4) : '—') + '</strong></li>' +
+      '<li><span>Error promedio frente a LTspice</span><strong>' + texto(promedioSim, 1, '%') + '</strong></li>' +
     '</ul>';
 
-  // Gráficas de Bode (necesitan la librería Chart.js, que se carga de internet)
+  // 3. Gráficas (necesitan la librería Chart.js, que se carga de internet)
   cajaGrafica.hidden = false;
+  const max = faseMaxima(c);
+  document.getElementById('nota-maximo').innerHTML = 'Para profundizar: según la teoría, V<sub>out</sub> se atrasa más (' +
+    formato(max.fase, 3) + '°) cerca de ' + formatoFrecuencia(max.f) + '.';
   if (typeof Chart === 'undefined') {
-    cajaGrafica.innerHTML = '<p class="nota">Las gráficas necesitan internet para cargarse.</p>';
+    document.getElementById('nota-maximo').innerHTML += ' Las gráficas necesitan internet para cargarse.';
     return;
   }
-  const medidosG = puntos.map(function (p) { return { x: p.f, y: p.ganancia }; });
-  const medidosF = conFase.map(function (p) { return { x: p.f, y: p.fase }; });
-  // Los ejes se amplían si alguna medición se sale del rango normal
-  const maxG = Math.max(1.1, Math.ceil(Math.max.apply(null, medidosG.map(function (p) { return p.y; })) * 11) / 10);
-  const fases = medidosF.map(function (p) { return p.y; });
-  const minF = Math.min(-90, Math.floor((Math.min.apply(null, fases.concat([0])) - 5) / 10) * 10);
-  const maxF = Math.max(0, Math.ceil((Math.max.apply(null, fases.concat([-90])) + 5) / 10) * 10);
-  graficaGanancia = graficar(graficaGanancia, 'grafica-ganancia', medidosG, curvaTeorica(rc, 'ganancia'), fcTeo, 0, maxG, 3);
-  graficaFase = graficar(graficaFase, 'grafica-fase', medidosF, curvaTeorica(rc, 'fase'), fcTeo, minF, maxF, 1);
+  const simG = [], simF = [];
+  FRECUENCIAS.forEach(function (f) {
+    const g = valorSim('sim-g', f), fa = valorSim('sim-f', f);
+    if (g > 0) simG.push({ x: f, y: g });
+    if (!isNaN(fa)) simF.push({ x: f, y: fa });
+  });
+  const medG = medidos.map(function (m) { return { x: m.f, y: m.ganancia }; });
+  const medF = conFase.map(function (m) { return { x: m.f, y: m.fase }; });
+  // Los ejes se amplían si algún valor se sale del rango normal
+  const valoresG = medG.concat(simG).map(function (p) { return p.y; });
+  const maxG = Math.max(1, Math.ceil(Math.max.apply(null, valoresG.concat([0])) * 11) / 10);
+  const valoresF = medF.concat(simF).map(function (p) { return p.y; });
+  const minF = Math.min(-60, Math.floor((Math.min.apply(null, valoresF.concat([0])) - 5) / 10) * 10);
+  const maxF = Math.max(0, Math.ceil((Math.max.apply(null, valoresF.concat([-60])) + 5) / 10) * 10);
+  graficaGanancia = graficar(graficaGanancia, 'grafica-ganancia', curvaTeorica(c, 'ganancia'), simG, medG, 0, maxG, 4);
+  graficaFase = graficar(graficaFase, 'grafica-fase', curvaTeorica(c, 'fase'), simF, medF, minF, maxF, 3);
 }
 
 // Revisa todas las filas y la comparación (sin registrar eventos)
@@ -543,6 +566,58 @@ function revisarTodo() {
   filas.forEach(function (fila) { revisarFila(fila, false); });
   mostrarAvisoMediciones();
   actualizarComparacion();
+}
+
+
+// ---------- Copiar resultados para pegarlos en la guía ----------
+
+// Arma las Tablas 8 y 9 como texto separado por tabulaciones (se pega bien en Word o Excel)
+function textoParaGuia() {
+  const c = leerComponentes();
+  const texto = function (v, d) { return v === null || v === undefined || isNaN(v) ? '' : formato(v, d); };
+  const lineas8 = ['Tabla 8. Mediciones a tres frecuencias',
+    ['Frecuencia', 'Vin (Vpp)', 'Vout (Vpp)', 'Vout / Vin medida', 'Δt (µs)', 'Fase (°)'].join('\t')];
+  const lineas9 = ['Tabla 9. Comparación teórico, simulado y medido',
+    ['Frecuencia', '|Vout/Vin| teórico', '|Vout/Vin| LTspice', '|Vout/Vin| medido', 'Error (%)',
+     'Fase teórica (°)', 'Fase LTspice (°)', 'Fase medida (°)'].join('\t')];
+  FRECUENCIAS.forEach(function (f) {
+    const fila = document.querySelector('#tabla-ac tr[data-f="' + f + '"]');
+    const m = medicionDe(fila);
+    const teo = c ? respuesta(f, c) : null;
+    const nombre = formatoFrecuencia(f).replace('\u00a0', ' ');
+    lineas8.push([nombre, m ? texto(m.vin, 3) : '', m ? texto(m.vout, 3) : '', m ? texto(m.ganancia, 4) : '',
+                  m && m.dt !== null ? texto(m.dt, 3) : '', m && m.fase !== null ? texto(m.fase, 3) : ''].join('\t'));
+    const error = teo && m && m.vin > 0 ? Math.abs(m.ganancia - teo.ganancia) / teo.ganancia * 100 : null;
+    lineas9.push([nombre, teo ? texto(teo.ganancia, 4) : '', texto(valorSim('sim-g', f), 4), m ? texto(m.ganancia, 4) : '',
+                  texto(error, 1), teo ? texto(teo.fase, 3) : '', texto(valorSim('sim-f', f), 3),
+                  m && m.fase !== null ? texto(m.fase, 3) : ''].join('\t'));
+  });
+  return lineas8.join('\n') + '\n\n' + lineas9.join('\n');
+}
+
+function copiarResultados() {
+  const estado = document.getElementById('estado-copiar');
+  const texto = textoParaGuia();
+  const listo = function () {
+    estado.hidden = false;
+    estado.textContent = 'Copiado. Pégalo en la guía (Word) o en Excel con Ctrl + V.';
+  };
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(texto).then(listo, function () { copiarConArea(texto); listo(); });
+  } else {
+    copiarConArea(texto);
+    listo();
+  }
+}
+
+// Plan B para copiar en navegadores antiguos
+function copiarConArea(texto) {
+  const area = document.createElement('textarea');
+  area.value = texto;
+  document.body.appendChild(area);
+  area.select();
+  try { document.execCommand('copy'); } catch (error) {}
+  document.body.removeChild(area);
 }
 
 
@@ -589,25 +664,27 @@ function recogerDatos(grupo) {
   filas.forEach(function (fila) {
     const m = medicionDe(fila);
     if (m) {
-      textoMediciones.push(formatoFrecuencia(m.f).replace('\u00a0', ' ') + ': CH1 ' + fila.querySelector('.ch1').value.trim() +
-        ' Vpp, CH2 ' + fila.querySelector('.ch2').value.trim() + ' Vpp' +
-        (m.dt === null ? '' : ', Δt ' + fila.querySelector('.dt').value.trim() + ' µs'));
+      const simG = valorSim('sim-g', m.f), simF = valorSim('sim-f', m.f);
+      textoMediciones.push(formatoFrecuencia(m.f).replace('\u00a0', ' ') + ': Vin ' + fila.querySelector('.ch1').value.trim() +
+        ' Vpp, Vout ' + fila.querySelector('.ch2').value.trim() + ' Vpp' +
+        (m.dt === null ? '' : ', Δt ' + fila.querySelector('.dt').value.trim() + ' µs') +
+        (isNaN(simG) && isNaN(simF) ? '' : ' (LTspice ' + (isNaN(simG) ? '—' : formato(simG, 4)) + '; ' + (isNaN(simF) ? '—' : formato(simF, 3)) + '°)'));
     }
   });
   const u = ultimaComparacion;
   const extra = [
-    'fc experimental ' + (u.fcExp === null ? '—' : Math.round(u.fcExp) + ' Hz'),
-    'fc teórica ' + Math.round(u.fcTeo) + ' Hz',
-    'fc LTspice ' + (u.fcSim === null ? '—' : Math.round(u.fcSim) + ' Hz'),
-    'desfase prom. ' + (u.promedioFase === null ? '—' : u.promedioFase.toFixed(1).replace('.', ',') + '°')
+    'Vout/Vin a 24,6 kHz ' + (u.ganancia24 === null ? '—' : u.ganancia24.toFixed(4).replace('.', ',')),
+    'dif. fase prom. ' + (u.promedioFase === null ? '—' : u.promedioFase.toFixed(3).replace('.', ',') + '°'),
+    'error vs LTspice ' + (u.promedioSim === null ? '—' : u.promedioSim.toFixed(1).replace('.', ',') + ' %')
   ];
 
   const alertas = resumenAlertas();
   return {
     grupo: grupo,
-    laboratorio: 'Lab 4 - Análisis AC',
+    laboratorio: 'Lab 4 - Osciloscopio y AC',
     voltaje: leerNumero('vpp'),
-    resistencia: 'R=' + document.getElementById('r').value.trim() + ' Ω; C=' + document.getElementById('c').value.trim() + ' nF',
+    resistencia: 'R1=' + document.getElementById('r1').value.trim() + ' Ω; C1=' + document.getElementById('c1').value.trim() +
+                 ' nF; R2=' + document.getElementById('r2').value.trim() + ' Ω; C2=' + document.getElementById('c2').value.trim() + ' nF',
     chequeo: marcadas + ' de ' + casillas.length,
     primeraVez: primeraVez,
     mediciones: textoMediciones.join('; ') + ' | ' + extra.join('; '),
@@ -630,7 +707,7 @@ document.getElementById('btn-verificar').addEventListener('click', function () {
 });
 
 // Si cambian los datos del circuito, se recalcula todo
-['vpp', 'frecuencia', 'r', 'c'].forEach(function (id) {
+['r1', 'c1', 'r2', 'c2', 'vpp'].forEach(function (id) {
   document.getElementById(id).addEventListener('change', function () {
     if (!document.getElementById('resultado-pre').hidden) verificar();
     revisarTodo();
@@ -648,8 +725,13 @@ filas.forEach(function (fila) {
   });
 });
 
-// La frecuencia de corte de LTspice solo cambia la comparación
-document.getElementById('fc-ltspice').addEventListener('change', actualizarComparacion);
+// Los valores de LTspice solo cambian la comparación
+document.querySelectorAll('.sim-g, .sim-f').forEach(function (campo) {
+  campo.addEventListener('change', actualizarComparacion);
+});
+
+// Botón para copiar las Tablas 8 y 9
+document.getElementById('btn-copiar').addEventListener('click', copiarResultados);
 
 // Después de "Borrar mis datos", se limpia también la tabla y las gráficas
 document.getElementById('borrar-datos').addEventListener('click', function () {
@@ -664,12 +746,12 @@ document.getElementById('btn-enviar').addEventListener('click', function () {
     return;
   }
   if (!ultimaComparacion) {
-    mostrarEstadoEnvio('Completa la pre-verificación y al menos dos mediciones antes de enviar.', 'mal');
+    mostrarEstadoEnvio('Completa el cálculo teórico y al menos dos mediciones antes de enviar.', 'mal');
     return;
   }
   enviarRegistro(recogerDatos(grupo));
 });
 
 // Al abrir la página, recupera lo que había guardado
-if (leerCircuito()) verificar();
+if (leerComponentes() && leerNumero('vpp') > 0) verificar();
 revisarTodo();
