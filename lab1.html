@@ -92,11 +92,6 @@
         <li><label><input type="checkbox"> La fuente está en 0 V antes de encenderla.</label></li>
         <li><label><input type="checkbox"> El multímetro está en la escala correcta (mA o V).</label></li>
       </ul>
-      <p class="pregunta">¿El circuito funcionó a la primera?</p>
-      <div class="opciones">
-        <label><input type="radio" name="primera" value="si"> Sí</label>
-        <label><input type="radio" name="primera" value="no"> No</label>
-      </div>
     </section>
 
     <!-- 5. MEDICIONES -->
@@ -180,6 +175,12 @@
       <h2>7. Enviar resultados</h2>
       <p>Cuando termines, envía tus resultados al registro del proyecto de grado.
          Solo se envía el código de grupo, nunca nombres.</p>
+      <!-- Pregunta obligatoria: de aquí sale la tasa de errores de conexión -->
+      <p class="pregunta">¿El circuito funcionó a la primera, sin tener que corregir conexiones?</p>
+      <div class="opciones">
+        <label><input type="radio" name="primera" value="si"> Sí</label>
+        <label><input type="radio" name="primera" value="no"> No</label>
+      </div>
       <label class="campo"><span>Código de grupo</span>
         <input type="text" id="grupo" placeholder="Ej: G07" maxlength="10" autocapitalize="characters">
       </label>
@@ -191,7 +192,7 @@
   </main>
 
   <footer>
-    <p>Tus datos se guardan solos en este dispositivo.
+    <p>Tus datos se guardan solos en este dispositivo. Si otro grupo lo va a usar después, toca
        <button id="borrar-datos" class="enlace">Borrar mis datos</button></p>
     <p>Proyecto de grado · Ingeniería Eléctrica · Uninorte</p>
   </footer>

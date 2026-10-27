@@ -456,3 +456,10 @@ footer p { margin: 4px 0; }
 @media (min-width: 601px) {
   .lab-ac .indicadores { grid-template-columns: repeat(3, 1fr); }
 }
+
+/* ===================================================
+   Agregado con las mejoras del registro
+   =================================================== */
+
+/* Pregunta "¿Funcionó a la primera?" dentro de Enviar: espacio antes del código de grupo */
+#enviar .opciones { margin-bottom: 18px; }
