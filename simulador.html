@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulador de conexiones · Circuitos I</title>
+  <!-- Usa los estilos de todas las páginas y, encima, los propios del simulador -->
+  <link rel="stylesheet" href="estilos.css">
+  <link rel="stylesheet" href="simulador.css">
+</head>
+<!-- El color cambia solo: naranja si se abre desde el Lab 1 y verde desde el Lab 2 -->
+<body class="lab lab-ohm simulador">
+
+  <header>
+    <div class="contenido">
+      <a class="volver" id="volver" href="lab1.html">← Volver al Lab 1</a>
+      <div class="encabezado-lab">
+        <span class="simbolo" id="simbolo">Ω</span>
+        <div>
+          <h1>Simulador de conexiones</h1>
+          <p>Mesa virtual con multímetros Fluke 75 y tres bancos de resistencias.</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="contenido">
+
+    <!-- LA MESA -->
+    <section class="seccion">
+      <h2>Mesa de trabajo</h2>
+      <p class="nota-mesa">En esta mesa <strong>no hay fuente</strong>: aquí se practica cómo conectar el multímetro
+         y cómo medir resistencias, solas y combinadas, antes de ir al laboratorio.</p>
+
+      <!-- Barra de herramientas -->
+      <div class="barra">
+        <div class="colores" id="colores" role="group" aria-label="Color del próximo cable"></div>
+        <button class="boton chico" id="btn-multimetro">Añadir multímetro</button>
+        <button class="boton chico secundario" id="btn-quitar-cable" disabled>Quitar cable</button>
+        <button class="boton chico secundario" id="btn-quitar-todos">Quitar todos los cables</button>
+        <button class="boton chico secundario" id="btn-sonido" aria-pressed="true">Sonido: sí</button>
+      </div>
+
+      <!-- Aquí js/simulador.js dibuja los equipos y los cables -->
+      <div class="mesa" id="mesa">
+        <svg id="lienzo" role="img" aria-label="Mesa con multímetros y bancos de resistencias"></svg>
+        <!-- Menú de valores que aparece al tocar la perilla de una resistencia -->
+        <div class="menu-valores" id="menu-valores" hidden></div>
+      </div>
+      <p class="estado-mesa" id="estado-mesa">Toca un borne para empezar un cable.</p>
+    </section>
+
+    <!-- LECTURAS Y AVISOS -->
+    <section class="seccion">
+      <h2>Lecturas</h2>
+      <ul class="lecturas" id="lecturas"></ul>
+      <div id="avisos"></div>
+    </section>
+
+    <!-- EJERCICIOS -->
+    <section class="seccion">
+      <h2>Ejercicios</h2>
+      <div class="pestanas" role="tablist">
+        <button class="pestana" data-lab="1" role="tab">Lab 1: Ley de Ohm</button>
+        <button class="pestana" data-lab="2" role="tab">Lab 2: Kirchhoff</button>
+      </div>
+      <ol class="retos" id="retos"></ol>
+      <p class="nota"><button class="enlace" id="btn-reiniciar-retos">Reiniciar estos ejercicios</button></p>
+    </section>
+
+    <!-- CÓMO SE USA -->
+    <section class="seccion">
+      <h2>Cómo se usa</h2>
+      <ol class="instrucciones">
+        <li><strong>Conectar un cable:</strong> elige el color arriba, toca un borne y luego otro. Para cancelar, toca otra vez el mismo borne.</li>
+        <li><strong>Quitar un cable:</strong> tócalo para elegirlo y luego toca “Quitar cable”.</li>
+        <li><strong>Selector del Fluke 75:</strong> toca la posición que quieras (Ω para medir resistencia) o toca la perilla para pasar a la siguiente.</li>
+        <li><strong>RANGE</strong> cambia el rango a mano (AUTO es automático) y <strong>HOLD</strong> congela la lectura.</li>
+        <li><strong>Valor de una resistencia:</strong> toca su perilla y elige el valor. Como en la vida real, cada resistencia tiene una tolerancia de ±5 %, así que lo que mides no es exactamente el valor nominal.</li>
+      </ol>
+    </section>
+
+  </main>
+
+  <footer>
+    <p>La mesa se guarda sola en este dispositivo.
+       <button id="btn-vaciar" class="enlace">Dejar la mesa como al principio</button></p>
+    <p>Proyecto de grado · Ingeniería Eléctrica · Uninorte</p>
+  </footer>
+
+  <script src="js/simulador.js"></script>
+</body>
+</html>

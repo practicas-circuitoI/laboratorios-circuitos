@@ -1,0 +1,142 @@
+/* ===================================================
+   Estilos propios del simulador de conexiones
+   (se cargan después de estilos.css)
+   =================================================== */
+
+/* La mesa necesita más ancho que las páginas de laboratorio */
+.simulador .contenido { max-width: 980px; }
+
+.nota-mesa { margin-top: 0; }
+
+/* Barra de herramientas encima de la mesa */
+.barra { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 12px 0; }
+.colores { display: flex; align-items: center; gap: 6px; margin-right: 6px; }
+.colores span { font-size: 13px; font-weight: 600; color: #4a5164; margin-right: 2px; }
+.color {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 3px solid white;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px #cfd4e0;
+  cursor: pointer;
+}
+.color.activo { box-shadow: 0 0 0 3px var(--color); }
+.boton.chico { padding: 8px 14px; font-size: 14px; margin: 0; }
+button.boton.secundario { border: none; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+button.boton:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* La mesa: el dibujo se ajusta al ancho de la pantalla */
+.mesa {
+  position: relative;
+  background: #e6e9f0;
+  border-radius: 14px;
+  overflow: hidden;
+}
+.mesa svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.mesa svg text { pointer-events: none; }
+.mesa svg [data-borne],
+.mesa svg [data-cable],
+.mesa svg [data-modo],
+.mesa svg [data-perilla],
+.mesa svg [data-selector],
+.mesa svg [data-boton] { cursor: pointer; }
+.estado-mesa { font-size: 14px; color: #4a5164; margin: 8px 0 0; min-height: 1.4em; }
+
+/* Menú con los valores de una resistencia */
+.menu-valores {
+  position: absolute;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  width: 210px;
+  padding: 8px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.22);
+}
+.menu-valores p { grid-column: 1 / -1; margin: 0 0 4px; font-size: 13px; font-weight: 700; color: #1d2230; }
+.menu-valores button {
+  padding: 9px 4px;
+  border: none;
+  border-radius: 8px;
+  background: #f1f2f6;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+.menu-valores button.activo { background: var(--color); color: white; font-weight: 700; }
+
+/* Lecturas de cada multímetro */
+.lecturas { list-style: none; padding: 0; margin: 0 0 12px; display: grid; gap: 8px; }
+.lecturas li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--fondo);
+  color: #1d2230;
+}
+.lecturas strong { font-size: 18px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* Avisos: rojo = error de conexión, azul = explicación */
+.avisos-lista { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.avisos-lista li { margin: 0; padding: 10px 14px; border-radius: 10px; }
+.avisos-lista li.error { background: #fdecea; color: #8a1f11; }
+.avisos-lista li.info { background: var(--fondo); color: #1d2230; }
+
+/* Pestañas de los ejercicios */
+.pestanas { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+.pestana {
+  padding: 7px 14px;
+  border: none;
+  border-radius: 999px;
+  background: #f1f2f6;
+  color: #4a5164;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.pestana.activa { background: var(--color); color: white; }
+
+/* Lista de ejercicios con su marca de cumplido */
+.seccion .retos { list-style: none; padding-left: 0; margin: 0; counter-reset: reto; }
+.retos li {
+  position: relative;
+  margin: 0;
+  padding: 10px 0 10px 40px;
+  border-bottom: 1px solid #eef0f4;
+  color: #1d2230;
+}
+.retos li::before {
+  counter-increment: reto;
+  content: counter(reto);
+  position: absolute;
+  left: 0;
+  top: 9px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #f1f2f6;
+  color: #4a5164;
+  font-weight: 700;
+  font-size: 14px;
+  text-align: center;
+  line-height: 26px;
+}
+.retos li.hecho::before { content: "✓"; background: #e3f1e2; color: #1f5a26; }
+.retos li span { display: block; font-size: 13px; color: #6b7a8c; }
+
+.instrucciones li { margin-bottom: 8px; }
