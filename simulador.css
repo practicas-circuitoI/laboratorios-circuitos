@@ -201,6 +201,29 @@ button.boton:disabled { opacity: 0.45; cursor: not-allowed; }
 .reto-check li.si b { background: #e3f1e2; color: #1f5a26; }
 .reto-check li.no { background: #fff5f4; }
 .reto-check li.no b { background: #fdecea; color: #8a1f11; }
+/* El paso que sigue: amarillo, con su pista debajo. Los que faltan después: grises */
+.reto-check li.ahora { background: #fff8e1; box-shadow: inset 0 0 0 2px #f2c230; }
+.reto-check li.ahora b { background: #f2c230; color: #1d2230; }
+.reto-check li.falta { color: #6b7280; }
+.reto-check li.falta b { background: #eef0f4; color: #9aa1b2; }
+.reto-check li small { display: block; margin-top: 4px; font-size: 14px; line-height: 1.4; color: #4a5164; }
+
+/* Esquema del reto 7: cada parte se pone verde cuando está armada y la que sigue parpadea */
+.reto-figura { margin: 0 0 12px; padding: 12px; border-radius: 12px; background: #f5f6fa; }
+.esquema-reto { display: block; width: 100%; max-width: 500px; height: auto; margin: 0 auto; }
+.esquema-reto text { font-size: 16px; font-weight: 700; fill: #1d2230; }
+.esquema-reto .parte path {
+  fill: none;
+  stroke: #9aa1b2;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke .3s;
+}
+.esquema-reto .parte.listo path { stroke: #1f8a3a; stroke-width: 3.5; }
+.esquema-reto .parte.siguiente path { stroke: #e0a800; stroke-width: 3.5; animation: titilar 1.2s ease-in-out infinite; }
+@keyframes titilar { 50% { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) { .esquema-reto .parte.siguiente path { animation: none; } }
 
 .reto-pregunta { margin: 4px 0 12px; }
 .seccion .reto-pista { margin: 0 0 12px; padding: 10px 14px; border-radius: 10px; background: var(--fondo); color: #1d2230; }
