@@ -140,3 +140,99 @@ button.boton:disabled { opacity: 0.45; cursor: not-allowed; }
 .retos li span { display: block; font-size: 13px; color: #6b7a8c; }
 
 .instrucciones li { margin-bottom: 8px; }
+/* ===================================================
+   Práctica libre: el simulador abierto desde la portada
+   (amarillo y negro, como el Fluke) y la tarjeta del reto guiado
+   =================================================== */
+.lab-libre { --color: #1d2230; --fondo: #fdf3d0; }
+.lab-libre .simbolo { background: #f2c230; color: #1d2230; }
+.lab-libre .simbolo .icono { width: 26px; height: 26px; }
+.lab-libre .volver { color: #1d2230; }
+
+/* Tarjeta del reto: borde amarillo */
+.reto-guiado { border: 2px solid #f2c230; scroll-margin-top: 12px; }
+.reto-cabeza { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; }
+.reto-num { font-size: 13px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #8a6a00; }
+
+/* Puntos de avance: ✓ hecho, amarillo el actual, gris los que faltan */
+.puntos { display: flex; flex-wrap: wrap; gap: 6px; }
+.puntos button {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: #eef0f4;
+  color: #6b7280;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.puntos button.hecho { background: #e3f1e2; color: #1f5a26; }
+.puntos button.ahora { background: #f2c230; color: #1d2230; }
+.puntos button:disabled { opacity: .5; cursor: not-allowed; }
+
+.reto-guiado h2 { margin: 10px 0 6px; font-size: 22px; }
+.seccion .reto-texto { margin: 0 0 12px; color: #1d2230; font-size: 16px; }
+
+/* Lista de revisión en vivo: ✓ verde lo que está bien, ✗ rojo lo que falta */
+.seccion .reto-check { list-style: none; padding: 0; margin: 0 0 12px; display: grid; gap: 6px; }
+.reto-check li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #f5f6fa;
+  color: #1d2230;
+}
+.reto-check li b {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 13px;
+}
+.reto-check li.si b { background: #e3f1e2; color: #1f5a26; }
+.reto-check li.no { background: #fff5f4; }
+.reto-check li.no b { background: #fdecea; color: #8a1f11; }
+
+.reto-pregunta { margin: 4px 0 12px; }
+.seccion .reto-pista { margin: 0 0 12px; padding: 10px 14px; border-radius: 10px; background: var(--fondo); color: #1d2230; }
+
+/* Mensaje de "¡Lo lograste!": aparece con un pequeño movimiento */
+.reto-exito {
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #e3f1e2;
+  color: #1f5a26;
+  animation: aparecer .35s ease-out;
+}
+@keyframes aparecer { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+.reto-botones { display: flex; flex-wrap: wrap; gap: 8px; }
+.reto-botones .boton { margin: 0; }
+#reto-extra .boton { margin: 0 0 12px; }
+.boton.claro { background: #f1f2f6; color: #1d2230; }
+
+/* Lo que marca el multímetro, repetido dentro de la tarjeta */
+.lectura-mini {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #c7d3b0;
+  color: #1f2a17;
+  font-size: 14px;
+  font-weight: 700;
+}
+.lectura-mini strong { font-family: 'Courier New', monospace; font-size: 22px; white-space: nowrap; }

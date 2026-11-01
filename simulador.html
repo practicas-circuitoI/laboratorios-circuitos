@@ -26,6 +26,26 @@
 
   <main class="contenido">
 
+    <!-- RETO GUIADO: solo aparece en la práctica libre (al abrir el simulador desde la portada).
+         js/retos.js llena esta tarjeta y la revisa cada vez que algo cambia en la mesa -->
+    <section class="seccion reto-guiado" id="reto-guiado" hidden>
+      <div class="reto-cabeza">
+        <span class="reto-num" id="reto-num"></span>
+        <div class="puntos" id="reto-puntos"></div>
+      </div>
+      <h2 id="reto-titulo"></h2>
+      <p class="reto-texto" id="reto-texto"></p>
+      <ul class="reto-check" id="reto-check"></ul>
+      <div id="reto-extra"></div>
+      <p class="reto-pista" id="reto-pista" hidden></p>
+      <div class="reto-exito" id="reto-exito" hidden></div>
+      <div class="reto-botones">
+        <button class="boton claro" id="btn-pista">Ver pista</button>
+        <button class="boton" id="btn-siguiente" disabled>Siguiente reto →</button>
+      </div>
+      <div class="lectura-mini"><span id="reto-lectura-nombre"></span><strong id="reto-lectura"></strong></div>
+    </section>
+
     <!-- LA MESA -->
     <section class="seccion">
       <h2>Mesa de trabajo</h2>
@@ -57,8 +77,8 @@
       <div id="avisos"></div>
     </section>
 
-    <!-- EJERCICIOS -->
-    <section class="seccion">
+    <!-- EJERCICIOS (desde los Labs 1 y 2; en la práctica libre se usan los retos guiados) -->
+    <section class="seccion" id="seccion-ejercicios">
       <h2>Ejercicios</h2>
       <div class="pestanas" role="tablist">
         <button class="pestana" data-lab="1" role="tab">Lab 1: Ley de Ohm</button>
@@ -89,5 +109,7 @@
   </footer>
 
   <script src="js/simulador.js"></script>
+  <!-- Retos guiados de la práctica libre (solo actúan si se abrió desde la portada) -->
+  <script src="js/retos.js"></script>
 </body>
 </html>
