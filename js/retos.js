@@ -490,6 +490,15 @@
     revisarGuiado();
   };
 
+  // Atajo para revisar: simulador.html?reto=7 abre directo en ese reto
+  // (sirve para mostrarlo sin hacer los anteriores; marca los anteriores como hechos)
+  const retoPedido = Number(parametros.get('reto'));
+  if (retoPedido >= 1 && retoPedido <= TOTAL) {
+    guiado.actual = retoPedido - 1;
+    for (let i = 0; i < guiado.actual; i++) if (guiado.hechos.indexOf(i) < 0) guiado.hechos.push(i);
+    guardarGuiado();
+  }
+
   if (guiado.actual > TOTAL) guiado.actual = 0;
   mostrarReto();
 })();
