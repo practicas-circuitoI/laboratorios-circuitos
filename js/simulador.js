@@ -41,16 +41,24 @@ const BANCOS = ['B1', 'B2', 'B3'];
 const IDS_RES = [];
 BANCOS.forEach(function (b) { ['R1', 'R2', 'R3'].forEach(function (r) { IDS_RES.push(b + '.' + r); }); });
 
-// ---------- Laboratorio desde el que se abrió (?lab=1 o ?lab=2) ----------
+// ---------- Desde dónde se abrió: ?lab=1, ?lab=2 o la portada ----------
 const parametros = new URLSearchParams(location.search);
+const desdeLab = parametros.get('lab') === '1' || parametros.get('lab') === '2';
 const labOrigen = parametros.get('lab') === '2' ? '2' : '1';
 if (labOrigen === '2') {
   document.body.classList.remove('lab-ohm');
   document.body.classList.add('lab-kirchhoff');
   document.getElementById('simbolo').textContent = 'ΣI';
 }
-document.getElementById('volver').href = 'lab' + labOrigen + '.html';
-document.getElementById('volver').textContent = '← Volver al Lab ' + labOrigen;
+const enlaceVolver = document.getElementById('volver');
+if (desdeLab) {
+  enlaceVolver.href = 'lab' + labOrigen + '.html';
+  enlaceVolver.textContent = '← Volver al Lab ' + labOrigen;
+} else {
+  // Se abrió desde la portada ("¡Acá puedes practicar!")
+  enlaceVolver.href = 'index.html';
+  enlaceVolver.textContent = '← Volver a los laboratorios';
+}
 
 
 // ---------- Estado de la mesa (se guarda en el dispositivo) ----------
@@ -955,4 +963,4 @@ window.addEventListener('resize', function () {
 
 // ---------- Al abrir la página ----------
 anchoAnterior = document.getElementById('mesa').clientWidth;
-actualizar(); 
+actualizar();
