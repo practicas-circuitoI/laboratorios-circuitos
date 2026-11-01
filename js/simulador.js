@@ -44,8 +44,8 @@ BANCOS.forEach(function (b) { ['R1', 'R2', 'R3'].forEach(function (r) { IDS_RES.
 const parametros = new URLSearchParams(location.search);
 const desdeLab = parametros.get('lab') === '1' || parametros.get('lab') === '2';
 const labOrigen = parametros.get('lab') === '2' ? '2' : '1';
-// Desde la portada es práctica libre: guarda su propia mesa, aparte de la de los labs
-const CLAVE_MESA = desdeLab ? 'simulador-mesa' : 'simulador-mesa-libre';
+// Cada lab y la práctica libre guardan su propia mesa
+const CLAVE_MESA = desdeLab ? 'simulador-mesa-lab' + labOrigen : 'simulador-mesa-libre';
 if (labOrigen === '2') {
   document.body.classList.remove('lab-ohm');
   document.body.classList.add('lab-kirchhoff');
