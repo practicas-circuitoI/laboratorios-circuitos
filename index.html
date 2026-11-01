@@ -8,13 +8,28 @@
   <link rel="stylesheet" href="estilos.css">
 </head>
 <body>
-  <!-- Encabezado: la franja azul de arriba -->
+  <!-- Encabezado: la franja blanca de arriba -->
   <header>
     <div class="contenido">
       <h1>Laboratorios de Circuitos I</h1>
       <p>Universidad del Norte. Selecciona la práctica que vas a realizar.</p>
     </div>
   </header>
+
+  <!-- Franja de bienvenida: simulador de conexiones -->
+  <div class="franja">
+    <div class="franja-caja">
+      <p><strong>¿Primera vez aquí?</strong> Practica cómo conectar el multímetro antes de ir al laboratorio.</p>
+      <div class="franja-botones">
+        <a class="acceso practica" href="simulador.html">
+          <!-- Ícono de multímetro -->
+          <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="3"/><rect x="8" y="5" width="8" height="4" rx="1"/><circle cx="12" cy="15.5" r="3"/></svg>
+          ¡Acá puedes practicar!
+        </a>
+        <!-- Aquí irá el botón del manual de usuario cuando esté listo -->
+      </div>
+    </div>
+  </div>
 
   <!-- Zona principal: una tarjeta por laboratorio -->
   <main class="contenido">
