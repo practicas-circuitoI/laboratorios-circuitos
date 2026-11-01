@@ -1,0 +1,280 @@
+/* ===================================================
+   Simulador del Lab 4: generador, circuito y osciloscopio
+   (se carga después de estilos.css y simulador.css, que ya traen
+    el mapa de retos y la tarjeta del reto)
+   =================================================== */
+
+.sim4 .contenido { max-width: 1080px; }
+
+/* La tarjeta del reto con el azul del Lab 4 */
+.lab-ac .reto-guiado { border-color: var(--color); }
+.lab-ac .reto-num { color: var(--color); }
+
+/* ---------- La mesa: generador y circuito a la izquierda, osciloscopio a la derecha ---------- */
+.banco4 {
+  display: grid;
+  grid-template-columns: 330px minmax(0, 1fr);
+  grid-template-areas: "gen osc" "circ osc";
+  align-items: start;
+  gap: 14px;
+  padding: 14px;
+  border-radius: 14px;
+  background: #e6e9f0;
+  color: #1d2230;
+}
+.gen  { grid-area: gen; }
+.osc  { grid-area: osc; }
+.circ { grid-area: circ; }
+
+.gen-cab, .osc-cab, .circ-cab {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 2px 8px;
+  font-size: 12px;
+}
+.gen-cab span, .osc-cab span, .circ-cab span { color: #4a5164; }
+
+/* Conectores BNC */
+.bnc {
+  display: inline-block;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 4px solid #0d0f14;
+  background: radial-gradient(circle, #b8a14a 0 4px, #3a3f4a 5px);
+}
+.bnc.amarillo { border-color: #f2d02f; }
+.bnc.azul     { border-color: #3cc8f0; }
+.bnc.gris     { border-color: #9aa1b2; }
+
+/* ---------- Generador BK 4040B ---------- */
+.gen {
+  padding: 12px 14px;
+  border: 2px solid #9aa1b2;
+  border-radius: 14px;
+  background: #c9ced8;
+}
+.gen-cab strong { font-size: 13px; letter-spacing: .02em; }
+.gen-display {
+  margin: 8px 0 10px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: #1a0606;
+  color: #ff4a3a;
+  font-family: 'Courier New', monospace;
+  font-size: 30px;
+  font-weight: 700;
+  text-align: right;
+  white-space: nowrap;
+  text-shadow: 0 0 8px rgba(255, 74, 58, .45);
+}
+.gen-grupos { display: grid; gap: 8px; }
+.grupo-t {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: #4a5164;
+}
+.gen-botones { display: flex; flex-wrap: wrap; gap: 5px; }
+.gen-botones button, .gen-output, .osc-boton, .menu-item, .interruptor, .mm { font: inherit; cursor: pointer; }
+.gen-botones button {
+  min-width: 42px;
+  height: 32px;
+  padding: 0 8px;
+  border: none;
+  border-radius: 6px;
+  background: #eef0f4;
+  color: #1d2230;
+  font-size: 13px;
+  font-weight: 800;
+  box-shadow: 0 2px 0 #9aa1b2;
+}
+.gen-botones button svg { display: block; width: 26px; height: 14px; margin: 0 auto; }
+.gen-botones button.activo, .osc-boton.activo { background: var(--color); color: white; box-shadow: 0 2px 0 #0f3d7a; }
+.gen-perillas { display: flex; justify-content: space-between; gap: 4px; margin: 14px 0 10px; }
+.gen-salida { display: flex; align-items: center; gap: 10px; }
+.gen-output {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+  background: #eef0f4;
+  font-size: 13px;
+  font-weight: 800;
+  box-shadow: 0 2px 0 #9aa1b2;
+}
+/* Luz de la salida: gris apagada, verde encendida */
+.gen-output::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: #8a8f9c; }
+.gen-output.encendida { background: #1d2230; color: white; box-shadow: 0 2px 0 #000; }
+.gen-output.encendida::before { background: #3ddc6a; box-shadow: 0 0 8px #3ddc6a; }
+.bnc-txt { font-size: 11px; font-weight: 800; color: #4a5164; }
+
+/* ---------- Perillas ---------- */
+.perilla { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; }
+.perilla-t { font-size: 11px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; text-align: center; }
+.perilla-fila { display: flex; align-items: center; gap: 3px; }
+.mm {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: white;
+  color: #1d2230;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: 0 1px 0 #9aa1b2;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.mm:active { background: var(--fondo); }
+.pomo { width: 44px; height: 44px; border-radius: 50%; cursor: grab; touch-action: none; }
+.pomo svg { display: block; width: 100%; height: 100%; transition: transform .06s; }
+.pomo-c { fill: #2b2f38; stroke: #0d0f14; stroke-width: 2; }
+.pomo-l { stroke: white; stroke-width: 3.5; stroke-linecap: round; }
+.pomo.girando { cursor: grabbing; }
+.pomo:focus-visible { outline: 3px solid var(--color); outline-offset: 2px; }
+.perilla-v { min-height: 1.3em; font-size: 12px; font-weight: 700; color: #4a5164; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* ---------- Osciloscopio TBS1072B ---------- */
+.osc {
+  padding: 12px 14px;
+  border: 2px solid #9aa1b2;
+  border-radius: 16px;
+  background: #d9dde5;
+}
+.osc-cab strong { color: #1d63c4; font-size: 15px; }
+.osc-cuerpo { display: grid; grid-template-columns: minmax(0, 1fr) 112px; gap: 8px; margin-top: 8px; }
+.osc-pantalla { overflow: hidden; border: 4px solid #2b2f38; border-radius: 8px; background: #05121a; }
+.osc-pantalla svg { display: block; width: 100%; height: auto; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+.osc-pantalla.con-cursores svg { cursor: ew-resize; }
+.osc-pantalla text { font-family: Figtree, Arial, sans-serif; }
+
+/* Menú lateral */
+.osc-menu { display: flex; flex-direction: column; gap: 5px; padding: 6px; border-radius: 8px; background: #05121a; }
+.menu-t { padding: 4px 0; font-size: 12px; font-weight: 800; color: #c9cfdb; text-align: center; }
+.menu-t.ch1 { color: #f2d02f; }
+.menu-t.ch2 { color: #3cc8f0; }
+.menu-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 6px 4px;
+  border: 1px solid #2c3e48;
+  border-radius: 5px;
+  background: #0e2230;
+  color: #9aa1b2;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+}
+.menu-item b { color: #e8edf5; font-size: 13px; }
+button.menu-item:hover { border-color: #3cc8f0; }
+.menu-item.activo { border-color: #3cc8f0; background: #173b5c; }
+.menu-item.activo b { color: #3cc8f0; }
+.menu-item.fijo { opacity: .65; }
+.menu-vacio { margin: 0; padding: 10px 4px; font-size: 12px; color: #9aa1b2; text-align: center; }
+
+/* Controles debajo de la pantalla */
+.osc-controles { display: flex; flex-wrap: wrap; gap: 10px 8px; margin-top: 12px; }
+.osc-bloque {
+  display: flex;
+  flex: 1 1 128px;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 6px;
+  border-radius: 10px;
+  background: #eef0f4;
+}
+.osc-bloque.ch1 { box-shadow: inset 0 4px 0 #f2d02f; }
+.osc-bloque.ch2 { box-shadow: inset 0 4px 0 #3cc8f0; }
+.osc-boton {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  background: white;
+  color: #1d2230;
+  font-size: 12px;
+  font-weight: 800;
+  box-shadow: 0 2px 0 #9aa1b2;
+}
+.osc-dos { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.osc-titulo { padding: 6px 0; font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #4a5164; }
+.osc-entradas { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px 18px; margin-top: 12px; font-size: 12px; font-weight: 800; }
+.osc-entradas span { display: flex; align-items: center; gap: 6px; }
+
+/* ---------- Circuito y puntas ---------- */
+.circ {
+  padding: 12px 14px;
+  border: 2px solid #d5d9e3;
+  border-radius: 12px;
+  background: #f7f7f2;
+}
+.circ svg { display: block; width: 100%; max-width: 320px; height: auto; margin: 8px auto 0; }
+.circ svg text { font-family: Figtree, Arial, sans-serif; }
+.circ .c-n { font-size: 15px; font-weight: 800; fill: #1d2230; }
+.circ .c-v { font-size: 13px; font-weight: 700; fill: #4a5164; }
+.circ .c-s { font-size: 11px; font-weight: 700; fill: #4a5164; }
+.puntas4 { display: grid; gap: 8px; margin-top: 10px; }
+.punta4 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: #eef0f4;
+  font-size: 13px;
+  font-weight: 800;
+}
+.punta-nombre { display: flex; align-items: center; gap: 8px; }
+.punta-nombre i { width: 12px; height: 12px; border-radius: 50%; border: 4px solid #f2d02f; }
+.punta4.ch2 .punta-nombre i { border-color: #3cc8f0; }
+.interruptor { display: inline-flex; padding: 3px; border: none; border-radius: 999px; background: #3a3f4a; }
+.interruptor span { padding: 5px 11px; border-radius: 999px; color: #9aa1b2; font-size: 12px; font-weight: 800; }
+.interruptor span.activo { background: var(--color); color: white; }
+
+/* ---------- Casillas y tabla dentro de la tarjeta del reto ---------- */
+.campos-reto { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0 12px; margin: 0 0 4px; }
+.campos-reto input { width: 100%; }
+.tabla-reto-caja { overflow-x: auto; margin: 0 0 12px; }
+.tabla-reto { width: 100%; border-collapse: collapse; font-size: 14px; }
+.tabla-reto th, .tabla-reto td { padding: 6px; border-bottom: 1px solid #eef0f4; text-align: left; }
+.tabla-reto thead th { font-size: 12px; color: #6b7280; }
+.tabla-reto input { width: 100%; min-width: 70px; max-width: 160px; padding: 8px 10px; }
+.seccion .pregunta-reto { margin: 0 0 6px; font-weight: 700; color: #1d2230; }
+
+/* ---------- Pantallas pequeñas ---------- */
+@media (max-width: 860px) {
+  .banco4 { grid-template-columns: minmax(0, 1fr); grid-template-areas: "gen" "osc" "circ"; padding: 10px; }
+  .gen { max-width: 420px; width: 100%; box-sizing: border-box; justify-self: center; }
+}
+@media (max-width: 520px) {
+  .banco4 { margin: 0 -8px; gap: 10px; }
+  .gen, .osc, .circ { padding: 10px; }
+  .osc-cuerpo { grid-template-columns: minmax(0, 1fr); }
+  .osc-menu { flex-direction: row; flex-wrap: wrap; }
+  .osc-menu .menu-item { flex: 1 1 28%; }
+  .menu-t { width: 100%; }
+  .osc-bloque { flex-basis: 40%; }
+  .gen-display { font-size: 26px; }
+}
+
+/* En el generador no caben los botones a los lados: van debajo de cada perilla */
+.gen .perilla { flex: 1 1 0; }
+.gen .perilla-fila { display: grid; grid-template-columns: auto auto; justify-items: center; gap: 6px 10px; }
+.gen .pomo { grid-row: 1; grid-column: 1 / -1; }
+.gen .mm[data-d="-1"] { grid-row: 2; grid-column: 1; }
+.gen .mm[data-d="1"]  { grid-row: 2; grid-column: 2; }

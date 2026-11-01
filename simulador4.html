@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulador del Lab 4 · Circuitos I</title>
+  <!-- Estilos de todas las páginas, los del simulador (mapa y tarjeta del reto) y los propios del Lab 4 -->
+  <link rel="stylesheet" href="estilos.css">
+  <link rel="stylesheet" href="simulador.css">
+  <link rel="stylesheet" href="simulador4.css">
+</head>
+<!-- "lab-ac" = color azul del Lab 4 -->
+<body class="lab lab-ac simulador sim4">
+  <header>
+    <div class="contenido">
+      <a class="volver" href="lab4.html">← Volver al Lab 4</a>
+      <div class="encabezado-lab">
+        <span class="simbolo">V~</span>
+        <div>
+          <h1>Simulador del Lab 4</h1>
+          <p>6 retos con el generador y el osciloscopio, de fácil a difícil.</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="contenido">
+    <!-- MAPA DE LOS 6 RETOS (js/simulador4.js lo llena) -->
+    <section class="seccion">
+      <h2>Tus 6 retos</h2>
+      <p class="progreso-txt" id="mapa-progreso"></p>
+      <div class="mapa" id="mapa"></div>
+    </section>
+
+    <!-- RETO ACTUAL: se revisa solo cada vez que algo cambia en la mesa -->
+    <section class="seccion reto-guiado" id="reto-guiado">
+      <div class="reto-cabeza">
+        <span class="reto-num" id="reto-num"></span>
+        <div class="puntos" id="reto-puntos"></div>
+      </div>
+      <h2 id="reto-titulo"></h2>
+      <p class="reto-texto" id="reto-texto"></p>
+      <ul class="reto-check" id="reto-check"></ul>
+      <div id="reto-extra"></div>
+      <p class="reto-pista" id="reto-pista" hidden></p>
+      <div class="reto-exito" id="reto-exito" hidden></div>
+      <div class="reto-botones">
+        <button class="boton claro" id="btn-pista">Ver pista</button>
+        <button class="boton" id="btn-siguiente" disabled>Siguiente reto →</button>
+      </div>
+    </section>
+
+    <!-- LA MESA: generador, circuito y osciloscopio -->
+    <section class="seccion">
+      <h2>Mesa de trabajo</h2>
+      <p class="nota-mesa">Generador BK Precision 4040B, el circuito R–C del Lab 4 y osciloscopio Tektronix TBS1072B con dos puntas.
+        Las perillas se giran arrastrándolas o con sus botones <strong>−</strong> y <strong>+</strong>.</p>
+
+      <div class="banco4">
+        <!-- Generador de funciones -->
+        <div class="gen" id="gen">
+          <div class="gen-cab"><strong>BK PRECISION 4040B</strong><span>Generador de funciones</span></div>
+          <div class="gen-display" id="gen-display" aria-live="polite"></div>
+          <div class="gen-grupos">
+            <div class="gen-grupo">
+              <span class="grupo-t">Función</span>
+              <div class="gen-botones" id="gen-formas"></div>
+            </div>
+            <div class="gen-grupo">
+              <span class="grupo-t">Rango (Hz)</span>
+              <div class="gen-botones" id="gen-rangos"></div>
+            </div>
+          </div>
+          <div class="gen-perillas" id="gen-perillas"></div>
+          <div class="gen-salida">
+            <button class="gen-output" id="gen-output" aria-pressed="false">OUTPUT</button>
+            <span class="bnc negro" aria-hidden="true"></span><span class="bnc-txt">OUT 50 Ω</span>
+          </div>
+        </div>
+
+        <!-- Osciloscopio -->
+        <div class="osc" id="osc">
+          <div class="osc-cab"><strong>Tektronix</strong><span>TBS1072B · Osciloscopio digital</span></div>
+          <div class="osc-cuerpo">
+            <div class="osc-pantalla">
+              <!-- js/simulador4.js dibuja aquí las ondas, los cursores y las mediciones -->
+              <svg id="pantalla" viewBox="0 0 400 346" role="img" aria-label="Pantalla del osciloscopio"></svg>
+            </div>
+            <!-- Menú lateral: cambia según el botón que se toque -->
+            <div class="osc-menu" id="osc-menu"></div>
+          </div>
+          <div class="osc-controles">
+            <div class="osc-bloque ch1">
+              <button class="osc-boton" data-menu="ch1">CH1 MENU</button>
+              <div id="perilla-v1"></div>
+            </div>
+            <div class="osc-bloque ch2">
+              <button class="osc-boton" data-menu="ch2">CH2 MENU</button>
+              <div id="perilla-v2"></div>
+            </div>
+            <div class="osc-bloque">
+              <span class="osc-titulo">Horizontal</span>
+              <div id="perilla-t"></div>
+            </div>
+            <div class="osc-bloque">
+              <div class="osc-dos">
+                <button class="osc-boton" data-menu="medir">MEASURE</button>
+                <button class="osc-boton" data-menu="cursor">CURSOR</button>
+              </div>
+              <div id="perilla-c"></div>
+            </div>
+          </div>
+          <div class="osc-entradas" aria-hidden="true">
+            <span><i class="bnc amarillo"></i>CH1</span><span><i class="bnc azul"></i>CH2</span><span><i class="bnc gris"></i>EXT TRIG</span>
+          </div>
+        </div>
+
+        <!-- Circuito en el protoboard y las dos puntas -->
+        <div class="circ" id="circ">
+          <div class="circ-cab"><strong>Protoboard</strong><span>R₁‖C₁ en serie con R₂‖C₂</span></div>
+          <svg id="circuito" viewBox="0 0 320 400" role="img"
+               aria-label="Circuito: la salida del generador entra por IN; R1 en paralelo con C1, luego R2 en paralelo con C2 hasta tierra. La punta de CH1 mide Vin y la de CH2 mide Vout"></svg>
+          <div class="puntas4" id="puntas4"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CÓMO SE USA -->
+    <section class="seccion">
+      <h2>Cómo se usa</h2>
+      <ol class="instrucciones">
+        <li><strong>Perillas:</strong> arrástralas hacia arriba o a la derecha para subir, o usa sus botones − y +. Si las dejas presionadas, avanzan solas.</li>
+        <li><strong>Generador:</strong> la frecuencia es FREQ × RANGO. Por ejemplo, FREQ en 2,46 con el rango 10k da 24,6 kHz. AMPL cambia la amplitud y OUTPUT enciende la salida.</li>
+        <li><strong>Puntas:</strong> el interruptor ×1 / ×10 está en cada punta, debajo del circuito. El osciloscopio no lo ve: hay que decírselo en CH1 MENU o CH2 MENU → Sonda.</li>
+        <li><strong>MEASURE</strong> muestra el voltaje pico a pico y la frecuencia. Si una onda se sale de la pantalla, la medición aparece con <strong>?</strong>.</li>
+        <li><strong>CURSOR</strong> → Tipo: Tiempo pone dos líneas naranjas. Arrastra cada una en la pantalla, o elige en el menú cuál mover y toca la pantalla donde la quieres.
+            La perilla MOVER CURSOR la afina. Arriba a la izquierda aparece Δt.</li>
+        <li>En el laboratorio también existe <strong>AUTOSET</strong>, pero aquí se practica a mano para entender cada perilla.</li>
+      </ol>
+    </section>
+  </main>
+
+  <footer>
+    <p>La mesa y tu avance se guardan solos en este dispositivo.
+       <button id="btn-vaciar" class="enlace">Dejar la mesa como al principio</button></p>
+    <p>Proyecto de grado · Ingeniería Eléctrica · Uninorte</p>
+  </footer>
+
+  <script src="js/simulador4.js"></script>
+</body>
+</html>
