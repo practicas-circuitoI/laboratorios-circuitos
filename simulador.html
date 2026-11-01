@@ -26,7 +26,14 @@
 
   <main class="contenido">
 
-    <!-- RETO GUIADO: solo aparece en la práctica libre (al abrir el simulador desde la portada).
+    <!-- MAPA DE CIRCUITOS: solo desde los Labs 1 y 2 (js/retos.js lo llena) -->
+    <section class="seccion" id="mapa-circuitos" hidden>
+      <h2>Tus 6 circuitos</h2>
+      <p class="progreso-txt" id="mapa-progreso"></p>
+      <div class="mapa" id="mapa"></div>
+    </section>
+
+    <!-- RETO O CIRCUITO GUIADO: 8 retos desde la portada, 6 circuitos desde cada lab.
          js/retos.js llena esta tarjeta y la revisa cada vez que algo cambia en la mesa -->
     <section class="seccion reto-guiado" id="reto-guiado" hidden>
       <div class="reto-cabeza">
@@ -109,7 +116,7 @@
   </footer>
 
   <script src="js/simulador.js"></script>
-  <!-- Retos guiados de la práctica libre (solo actúan si se abrió desde la portada) -->
+  <!-- Retos guiados (práctica libre) y circuitos de cada lab -->
   <script src="js/retos.js"></script>
 </body>
 </html>

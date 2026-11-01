@@ -259,3 +259,73 @@ button.boton:disabled { opacity: 0.45; cursor: not-allowed; }
   font-weight: 700;
 }
 .lectura-mini strong { font-family: 'Courier New', monospace; font-size: 22px; white-space: nowrap; }
+
+/* ===================================================
+   Simulador desde los Labs 1 y 2: mapa de 6 circuitos
+   =================================================== */
+.lab-ohm .reto-guiado, .lab-kirchhoff .reto-guiado { border-color: var(--color); }
+.lab-ohm .reto-num, .lab-kirchhoff .reto-num { color: var(--color); }
+.lab-ohm .puntos button.ahora, .lab-kirchhoff .puntos button.ahora { background: var(--color); color: white; }
+.seccion .progreso-txt { margin: -4px 0 12px; font-weight: 600; }
+
+/* Tarjetas del mapa (son botones: se tocan para abrir ese circuito) */
+.mapa { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.circuito {
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  border: 1px solid #e3e6ef;
+  border-radius: 14px;
+  background: white;
+  color: #1d2230;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.circuito.hecho { background: #f6fbf5; border-color: #cfe6cc; }
+.circuito.ahora { border: 2px solid var(--color); box-shadow: 0 6px 18px rgba(29, 34, 48, .10); }
+.circuito:disabled { opacity: .5; cursor: not-allowed; }
+.circuito .cab { display: flex; justify-content: space-between; align-items: center; gap: 6px; font-size: 12px; font-weight: 800; color: #6b7280; text-transform: uppercase; letter-spacing: .04em; }
+.estado { padding: 2px 8px; border-radius: 999px; font-size: 11px; white-space: nowrap; }
+.estado.hecho { background: #e3f1e2; color: #1f5a26; }
+.estado.ahora { background: var(--color); color: white; }
+.estado.libre { background: var(--fondo); color: var(--color); }
+.estado.bloqueado { background: #eef0f4; color: #6b7280; }
+.circuito .nombre { margin: 4px 0 2px; font-size: 15px; font-weight: 800; line-height: 1.25; }
+.circuito .meta { font-size: 13px; font-weight: 700; color: var(--color); }
+.dificultad { display: flex; gap: 3px; margin-top: 8px; }
+.dificultad i { flex: 1; height: 5px; border-radius: 3px; background: #e3e6ef; }
+.dificultad i.lleno { background: var(--color); }
+.dificultad-txt { margin-top: 3px; font-size: 11px; font-weight: 700; color: #6b7280; }
+
+/* En celular: dos tarjetas por fila; en celulares angostos, una */
+@media (max-width: 640px) { .mapa { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; } .circuito { padding: 10px; } }
+@media (max-width: 380px) { .mapa { grid-template-columns: minmax(0, 1fr); } }
+
+/* Esquemas pequeños de cada circuito */
+.mini-esq { display: block; width: 100%; height: auto; }
+.mini-esq .trazo path { fill: none; stroke: #1d2230; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.mini-esq text { font-size: 13px; font-weight: 700; fill: #1d2230; }
+.mini-esq text.suave { font-size: 11px; font-weight: 600; fill: #6b7280; }
+.mini-esq text.pregunta { font-size: 28px; font-weight: 800; fill: var(--color); }
+.mini-esq .caja-pregunta { fill: var(--fondo); stroke: var(--color); stroke-width: 2.4; stroke-dasharray: 6 4; }
+.mini-esq .roja { fill: #d93025; }
+.mini-esq .negra { fill: #1d2230; }
+.mini-esq .alerta { fill: #f2c230; stroke: #1d2230; stroke-width: 2; }
+.mini-esq text.alerta-txt { font-size: 16px; font-weight: 800; }
+.esquema-grande { max-width: 360px; margin: 0 auto; }
+
+/* Preguntas con opciones (circuitos 5 y 6 del Lab 2) */
+.opciones-reto { display: grid; gap: 6px; margin: 0 0 12px; }
+.opciones-reto button {
+  padding: 10px 12px;
+  border: 1px solid #d5d9e3;
+  border-radius: 10px;
+  background: white;
+  color: #1d2230;
+  font: inherit;
+  font-size: 15px;
+  text-align: left;
+  cursor: pointer;
+}
+.opciones-reto button.elegida { border: 2px solid var(--color); background: var(--fondo); font-weight: 700; }

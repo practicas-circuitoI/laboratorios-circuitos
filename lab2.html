@@ -36,6 +36,22 @@
 
   <main class="contenido">
 
+    <!-- ¡HEY! PRACTICA ACÁ: el simulador con 6 circuitos de este lab, de fácil a difícil.
+         js/practica.js marca los puntos de los circuitos que ya se hicieron -->
+    <section class="practica-lab">
+      <div>
+        <span class="practica-etiqueta">Antes de empezar</span>
+        <h2>¡Hey! Practica acá, te ayudará</h2>
+        <p>6 circuitos del circuito de Kirchhoff, de fácil a difícil, con el Fluke 75 y los bancos de resistencias. Llega al laboratorio sabiendo medir.</p>
+        <div class="practica-niveles" data-clave="simulador-circuitos-lab2">
+          <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span>
+          <small>0 de 6 hechos</small>
+        </div>
+        <a class="practica-boton" href="simulador.html?lab=2" target="_blank" rel="noopener">Practicar ahora ↗</a>
+      </div>
+      <img src="dibujo-simulador.svg" alt="Multímetro Fluke 75 conectado a un banco de resistencias">
+    </section>
+
     <!-- 1. GUÍA -->
     <section id="guia" class="seccion">
       <h2>1. Guía del laboratorio</h2>
@@ -141,12 +157,6 @@
     <!-- 4. MONTAJE -->
     <section id="montaje" class="seccion">
       <h2>4. Montaje</h2>
-      <!-- Simulador de conexiones: se abre en otra pestaña -->
-      <div class="caja-info">
-        <strong>¿Quieres practicar antes?</strong> En el simulador conectas el multímetro Fluke 75 a los
-        bancos de resistencias y mides, sin riesgo de dañar nada.
-        <p><a class="boton" href="simulador.html?lab=2" target="_blank" rel="noopener">Abrir simulador de conexiones ↗</a></p>
-      </div>
       <p>Antes de medir, revisa cada punto:</p>
       <ul class="chequeo">
         <li><label><input type="checkbox"> Los resistores coinciden con el código de colores del circuito.</label></li>
@@ -276,5 +286,6 @@
   <script src="js/registro.js"></script>
   <script src="js/lab2.js"></script>
   <script src="js/diagnostico.js"></script>
+  <script src="js/practica.js"></script>
 </body>
 </html>

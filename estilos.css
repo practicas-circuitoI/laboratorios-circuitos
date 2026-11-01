@@ -563,3 +563,64 @@ footer p { margin: 4px 0; }
   .banner-caja { grid-template-columns: 1fr; }
   .banner-dibujo { order: -1; max-width: 260px; margin: 0; }
 }
+
+/* ===================================================
+   Labs 1 y 2: banner "¡Hey! Practica acá" (oscuro con el color del lab)
+   =================================================== */
+.practica-lab {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 250px;
+  align-items: center;
+  gap: 8px 20px;
+  overflow: hidden;
+  padding: 22px 24px;
+  border-radius: 18px;
+  background: #1d2230;
+  box-shadow: inset 6px 0 0 var(--color);
+  color: white;
+}
+.practica-lab h2 { margin: 0 0 6px; font-size: 26px; font-weight: 800; line-height: 1.15; }
+.practica-lab p  { margin: 0 0 14px; color: #c9cfdb; }
+.practica-etiqueta {
+  display: inline-block;
+  margin-bottom: 8px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--color);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+/* Puntos de avance: uno por circuito; se pintan con ✓ al hacerlo */
+.practica-niveles { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 16px; }
+.practica-niveles span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .12);
+  font-size: 13px;
+  font-weight: 800;
+}
+.practica-niveles span.hecho { background: var(--color); }
+.practica-niveles small { margin-left: 6px; font-size: 13px; color: #c9cfdb; }
+.practica-boton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 20px;
+  border-radius: 999px;
+  background: var(--color);
+  color: white;
+  font-weight: 800;
+  text-decoration: none;
+}
+.practica-lab img { display: block; width: 100%; height: auto; margin: -10px -14px -34px 0; }
+@media (max-width: 600px) {
+  .practica-lab { grid-template-columns: minmax(0, 1fr); }
+  .practica-lab img { order: -1; max-width: 240px; margin: 0; }
+  .practica-lab h2 { font-size: 23px; }
+}
