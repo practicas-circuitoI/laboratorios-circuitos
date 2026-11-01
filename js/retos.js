@@ -842,7 +842,9 @@
     const mem = memo();
     devolverFalla();
     mesaNueva('ohm');
-    const papeles = [['R₁', 'B1.R1', 1000], ['R₂', 'B1.R2', 2200], ['R₃', 'B1.R3', 1000], ['R₄', 'B2.R1', 3300]];
+    // [nombre, resistencia, valor de la perilla, cuánto mide de verdad si es la mala]
+    // (como si hubieran puesto otra resistencia: así el circuito completo cambia más de 10 %)
+    const papeles = [['R₁', 'B1.R1', 1000, 2.2], ['R₂', 'B1.R2', 2200, 0.45], ['R₃', 'B1.R3', 1000, 4.7], ['R₄', 'B2.R1', 3300, 3]];
     papeles.forEach(function (p) { estado.valores[p[1]] = p[2]; });
     estado.cables = [
       { a: 'M1.V', b: 'B1.R1.a', color: 'rojo' },
@@ -853,7 +855,7 @@
       { a: 'B2.R1.b', b: 'M1.COM', color: 'negro' }
     ];
     const elegida = papeles[Math.floor(Math.random() * papeles.length)];
-    const factor = Math.random() < 0.5 ? 0.47 : 1.5;   // muy fuera del ±5 %
+    const factor = elegida[3];
     mem.falla = { nombre: elegida[0], id: elegida[1], v: elegida[2], original: estado.factores[elegida[1]] };
     estado.factores[elegida[1]] = factor;
     mem.vista = null;
