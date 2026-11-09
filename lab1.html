@@ -53,23 +53,89 @@
       <img src="dibujo-simulador.svg" alt="Multímetro Fluke 75 conectado a un banco de resistencias">
     </section>
 
-    <!-- 1. GUÍA -->
+    <!-- 1. GUÍA: resumen de la guía oficial del Lab 1.
+         El documento completo está en la carpeta docs (PDF para leer y Word para llenar) -->
     <section id="guia" class="seccion">
       <h2>1. Guía del laboratorio</h2>
-      <p><strong>Objetivo:</strong> verificar experimentalmente la relación V = I·R y obtener
-         el valor de la resistencia a partir de la pendiente de la curva V–I.</p>
-      <p><strong>Materiales:</strong></p>
-      <ul>
-        <li>Fuente DC variable</li>
-        <li>Resistor de 1 kΩ, 1/4 W</li>
-        <li>Multímetro digital</li>
-        <li>Protoboard y cables</li>
+      <p class="guia-titulo"><strong>Ley de Ohm, resistencias y capacitores</strong>
+         Mediciones con multímetro, asociaciones serie y paralelo, y montaje soldado.</p>
+
+      <ul class="guia-ficha">
+        <li><span>Duración</span><strong>2 horas</strong> + preparación previa</li>
+        <li><span>Grupo</span><strong>3 o más</strong> con roles rotativos</li>
+        <li><span>Nivel</span><strong>Básico</strong> primera práctica</li>
+        <li><span>Puntos</span><strong>50</strong> en total</li>
       </ul>
-      <div class="aviso">
-        <strong>Seguridad:</strong> el resistor soporta máximo 0,25 W. Con 1 kΩ,
-        no superes 15,8 V en la fuente.
+
+      <div class="caja-info">
+        <strong>Antes de llegar:</strong> resuelve la Actividad 1 (las 5 preguntas previas y la Tabla 1 de cálculos)
+        y lee las normas de seguridad del laboratorio. Se entrega al empezar la sesión.
       </div>
-      <a class="boton" href="docs/guia-lab1.pdf" target="_blank">Abrir guía completa (PDF)</a>
+
+      <div class="aviso">
+        <strong>Seguridad</strong>
+        <ul>
+          <li><strong>Fuente DC:</strong> límite de corriente en 15&nbsp;mA y nunca más de 10&nbsp;V en la ley de Ohm.</li>
+          <li><strong>Multímetro:</strong> la entrada de mA va siempre en serie. En paralelo con la fuente se funde el fusible.</li>
+          <li><strong>Capacitores:</strong> tensión nominal de 16&nbsp;V o más, máximo 6,5&nbsp;V de pico, y descárgalos con una resistencia de 1&nbsp;kΩ entre mediciones.</li>
+          <li><strong>Soldador:</strong> gafas puestas, siempre en su soporte y con ventilación.</li>
+        </ul>
+      </div>
+
+      <!-- Cada parte se abre al tocarla -->
+      <div class="errores-comunes guia-partes">
+        <details>
+          <summary>Objetivos</summary>
+          <ol>
+            <li>Medir resistencias con el óhmetro y verificar la ley de Ohm en una resistencia de 1&nbsp;kΩ, sin pasar su límite de potencia.</li>
+            <li>Calcular y medir la resistencia equivalente de montajes en serie, paralelo y mixto, y expresar la diferencia como error porcentual.</li>
+            <li>Medir la capacitancia de cada capacitor y la equivalente en serie y en paralelo con el capacímetro.</li>
+            <li>Medir con una señal de 1&nbsp;kHz cómo se reparte la tensión en capacitores en serie y en paralelo, y explicarlo con las reactancias.</li>
+            <li>Soldar un circuito de resistencias sobre baquelita perforada, con uniones limpias, y comprobar su resistencia equivalente.</li>
+            <li>Aplicar las normas de seguridad al usar la fuente, el generador, el soldador y los capacitores.</li>
+          </ol>
+        </details>
+        <details>
+          <summary>Materiales y equipos</summary>
+          <ul>
+            <li>Multímetro digital Fluke 179 o equivalente (VDC, VAC true RMS, mA DC, Ω y capacitancia)</li>
+            <li>Fuente DC regulada de 0 a 30&nbsp;V con límite de corriente</li>
+            <li>Generador de funciones: senoidal de 1&nbsp;kHz, con salida Hi-Z / 50&nbsp;Ω</li>
+            <li>Resistencias de 1/4&nbsp;W y 5&nbsp;%: 220&nbsp;Ω (R<sub>A</sub>), 470&nbsp;Ω (R<sub>B</sub>), 1&nbsp;kΩ (R<sub>C</sub>), 2,2&nbsp;kΩ (R<sub>D</sub>) y 4,7&nbsp;kΩ (R<sub>E</sub>)</li>
+            <li>Capacitores electrolíticos bipolares de 16&nbsp;V o más: C1 = 100&nbsp;µF, C2 = 220&nbsp;µF y C3 = 3,3&nbsp;µF</li>
+            <li>Módulo de resistencias del laboratorio (posiciones 1 a 6, con R1, R2 y R3)</li>
+            <li>Protoboard, cables, caimanes y cable BNC–caimán</li>
+            <li>Baquelita perforada de 5&nbsp;×&nbsp;7&nbsp;cm</li>
+            <li>Equipo de soldadura: soldador de 25 a 40&nbsp;W con soporte, estaño con flux, esponja, alicate y cortafrío</li>
+            <li>Gafas de seguridad, una por persona</li>
+          </ul>
+        </details>
+        <details>
+          <summary>Actividades y puntos</summary>
+          <div class="tabla-scroll">
+            <table class="guia-actividades">
+              <tr><th>Actividad</th><th>Qué se hace</th><th>Puntos</th></tr>
+              <tr><td>1</td><td>Preguntas previas y cálculos <em>(antes del laboratorio)</em></td><td>4</td></tr>
+              <tr><td>2</td><td>Medir las resistencias del módulo</td><td>3</td></tr>
+              <tr><td>3</td><td>Serie y paralelo en el módulo</td><td>4</td></tr>
+              <tr class="en-pagina"><td>4</td><td>Ley de Ohm: V–I, gráfica, pendiente y potencia <span class="chip bien">en esta página</span></td><td>8</td></tr>
+              <tr><td>6</td><td>Resistencias en serie</td><td>5</td></tr>
+              <tr><td>7</td><td>Resistencias en paralelo</td><td>5</td></tr>
+              <tr><td>8</td><td>Circuito mixto soldado en baquelita</td><td>5</td></tr>
+              <tr><td>9</td><td>Capacitores en serie con señal de 1&nbsp;kHz</td><td>8</td></tr>
+              <tr><td>10</td><td>Capacitores en paralelo</td><td>5</td></tr>
+              <tr><td>11</td><td>Conclusiones con datos</td><td>3</td></tr>
+              <tr class="total"><td colspan="2">Total</td><td>50</td></tr>
+            </table>
+          </div>
+          <p class="nota">La Actividad 5 se hace en la Práctica II. Las secciones 3 a 6 de esta página te acompañan en la Actividad 4.</p>
+        </details>
+      </div>
+
+      <div class="guia-botones">
+        <a class="boton" href="docs/guia-lab1.pdf" target="_blank" rel="noopener">Abrir guía completa (PDF)</a>
+        <a class="boton secundario" href="docs/guia-lab1.docx" download>Descargar en Word para llenarla</a>
+      </div>
     </section>
 
     <!-- 2. VIDEO -->
@@ -101,12 +167,14 @@
     <!-- 4. MONTAJE -->
     <section id="montaje" class="seccion">
       <h2>4. Montaje</h2>
-      <p>Antes de medir, revisa cada punto:</p>
+      <p>Antes de energizar la fuente, revisa cada punto y pide el visto bueno al docente
+         (es la lista de verificación de la Actividad 4 de la guía):</p>
       <ul class="chequeo">
-        <li><label><input type="checkbox"> El amperímetro está en serie con el resistor.</label></li>
-        <li><label><input type="checkbox"> El voltímetro está en paralelo con el resistor.</label></li>
-        <li><label><input type="checkbox"> La fuente está en 0 V antes de encenderla.</label></li>
-        <li><label><input type="checkbox"> El multímetro está en la escala correcta (mA o V).</label></li>
+        <li><label><input type="checkbox"> <span>La fuente está apagada y con el límite de corriente en 15&nbsp;mA.</span></label></li>
+        <li><label><input type="checkbox"> <span>Mediste R<sub>C</sub> con el óhmetro antes de conectarla y la anotaste en la pre-verificación.</span></label></li>
+        <li><label><input type="checkbox"> <span>El amperímetro está en la entrada de mA y en serie con la resistencia.</span></label></li>
+        <li><label><input type="checkbox"> <span>El voltímetro está en la entrada de tensión y en paralelo con la resistencia.</span></label></li>
+        <li><label><input type="checkbox"> <span>El positivo de la fuente va hacia la entrada de mA y el negativo al otro extremo de la resistencia.</span></label></li>
       </ul>
     </section>
 
