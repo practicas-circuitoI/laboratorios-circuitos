@@ -624,3 +624,42 @@ footer p { margin: 4px 0; }
   .practica-lab img { order: -1; max-width: 240px; margin: 0; }
   .practica-lab h2 { font-size: 23px; }
 }
+
+/* ===================================================
+   Guía del laboratorio: resumen del documento oficial
+   =================================================== */
+.seccion .guia-titulo { margin: 0 0 14px; }
+.guia-titulo strong { display: block; font-size: 18px; color: var(--color); }
+
+/* Ficha: duración, grupo, nivel y puntos */
+.seccion ul.guia-ficha {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+  margin: 0 0 14px;
+  padding: 0;
+  list-style: none;
+}
+.guia-ficha li { margin: 0; padding: 10px 12px; border-radius: 12px; background: #f5f6fa; font-size: 14px; color: #4a5164; }
+.guia-ficha span { display: block; font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: #6b7a8c; }
+.guia-ficha strong { display: block; font-size: 18px; color: #1d2230; }
+
+.aviso ul { margin: 6px 0 0; padding-left: 20px; }
+.aviso li { margin: 4px 0; }
+
+/* Partes que se abren al tocarlas (usa el estilo de "Errores comunes") */
+.guia-partes details > ol,
+.guia-partes details > ul,
+.guia-partes details > .tabla-scroll,
+.guia-partes details > .nota { margin: 0 0 12px 22px; }
+.guia-partes details > ol li,
+.guia-partes details > ul li { margin: 6px 0; }
+.guia-actividades td:first-child, .guia-actividades th:first-child,
+.guia-actividades td:last-child, .guia-actividades th:last-child { text-align: center; white-space: nowrap; }
+.guia-actividades tr.en-pagina td { background: var(--fondo); }
+.guia-actividades tr.total td { font-weight: 800; }
+.guia-actividades .chip { margin-left: 6px; }
+
+/* Botones del documento completo */
+.guia-botones { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.guia-botones .boton { margin: 0; }
