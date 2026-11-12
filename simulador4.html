@@ -18,16 +18,16 @@
         <span class="simbolo">V~</span>
         <div>
           <h1>Simulador del Lab 4</h1>
-          <p>6 retos con el generador y el osciloscopio, de fácil a difícil.</p>
+          <p>7 retos: arma el circuito en la protoboard y mide con el generador y el osciloscopio, de fácil a difícil.</p>
         </div>
       </div>
     </div>
   </header>
 
   <main class="contenido">
-    <!-- MAPA DE LOS 6 RETOS (js/simulador4.js lo llena) -->
+    <!-- MAPA DE LOS 7 RETOS (js/simulador4.js lo llena) -->
     <section class="seccion">
-      <h2>Tus 6 retos</h2>
+      <h2>Tus 7 retos</h2>
       <p class="progreso-txt" id="mapa-progreso"></p>
       <div class="mapa" id="mapa"></div>
     </section>
@@ -50,13 +50,36 @@
       </div>
     </section>
 
-    <!-- LA MESA: generador, circuito y osciloscopio -->
+    <!-- LA MESA: protoboard, generador y osciloscopio -->
     <section class="seccion">
       <h2>Mesa de trabajo</h2>
-      <p class="nota-mesa">Generador BK Precision 4040B, el circuito R–C del Lab 4 y osciloscopio Tektronix TBS1072B con dos puntas.
+      <p class="nota-mesa">Protoboard con el circuito R–C del Lab 4, generador BK Precision 4040B y osciloscopio Tektronix TBS1072B con dos puntas.
         Las perillas se giran arrastrándolas o con sus botones <strong>−</strong> y <strong>+</strong>.</p>
 
       <div class="banco4">
+        <!-- Protoboard: el estudiante pone cada pieza tocándola en la bandeja y luego sus huecos -->
+        <div class="proto" id="proto-panel">
+          <div class="proto-cab"><strong>Protoboard</strong><span>Cada columna de 5 huecos está unida por dentro</span></div>
+          <div class="proto-cuerpo">
+            <div class="proto-esq">
+              <span class="grupo-t">Esquema a armar</span>
+              <svg id="esquema" viewBox="0 0 330 180" role="img"
+                   aria-label="Esquema: el generador Vin entra a R1 en paralelo con C1; luego R2 en paralelo con C2 hasta la tierra común. CH1 mide en Vin y CH2 mide en Vout, entre los dos pares"></svg>
+            </div>
+            <div class="proto-tablero">
+              <svg id="proto" viewBox="0 0 348 304" role="group" aria-label="Protoboard de 8 columnas con riel + arriba y riel − abajo"></svg>
+              <p class="proto-estado" id="proto-estado" aria-live="polite"></p>
+            </div>
+            <div class="proto-lado">
+              <div class="bandeja" id="bandeja"></div>
+              <div class="proto-botones">
+                <button id="btn-quitar" disabled>Quitar pieza</button>
+                <button id="btn-vaciar-proto">Vaciar protoboard</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Generador de funciones -->
         <div class="gen" id="gen">
           <div class="gen-cab"><strong>BK PRECISION 4040B</strong><span>Generador de funciones</span></div>
@@ -115,11 +138,9 @@
           </div>
         </div>
 
-        <!-- Circuito en el protoboard y las dos puntas -->
+        <!-- Las dos puntas: interruptor ×1 / ×10 y dónde quedaron enganchadas -->
         <div class="circ" id="circ">
-          <div class="circ-cab"><strong>Protoboard</strong><span>R₁‖C₁ en serie con R₂‖C₂</span></div>
-          <svg id="circuito" viewBox="0 0 320 400" role="img"
-               aria-label="Circuito: la salida del generador entra por IN; R1 en paralelo con C1, luego R2 en paralelo con C2 hasta tierra. La punta de CH1 mide Vin y la de CH2 mide Vout"></svg>
+          <div class="circ-cab"><strong>Puntas del osciloscopio</strong><span>Interruptor ×1 / ×10</span></div>
           <div class="puntas4" id="puntas4"></div>
         </div>
       </div>
@@ -129,6 +150,8 @@
     <section class="seccion">
       <h2>Cómo se usa</h2>
       <ol class="instrucciones">
+        <li><strong>Protoboard:</strong> los 5 huecos de cada columna están unidos por dentro, y los rieles + y − están unidos a lo largo.
+            Toca una pieza de la bandeja y luego el hueco de cada pata. Para mover una pata, tócala y luego toca el hueco nuevo.</li>
         <li><strong>Perillas:</strong> arrástralas hacia arriba o a la derecha para subir, o usa sus botones − y +. Si las dejas presionadas, avanzan solas.</li>
         <li><strong>Generador:</strong> la frecuencia es FREQ × RANGO. Por ejemplo, FREQ en 2,46 con el rango 10k da 24,6 kHz. AMPL cambia la amplitud y OUTPUT enciende la salida.</li>
         <li><strong>Puntas:</strong> el interruptor ×1 / ×10 está en cada punta, debajo del circuito. El osciloscopio no lo ve: hay que decírselo en CH1 MENU o CH2 MENU → Sonda.</li>
