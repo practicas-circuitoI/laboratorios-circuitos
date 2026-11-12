@@ -1,8 +1,9 @@
 // ===================================================
 // Simulador del Lab 4: generador, circuito R–C y osciloscopio
-//  - El circuito se resuelve con fasores (números complejos) para cada
-//    armónico de la señal del generador.
-//  - 6 retos guiados, de fácil a difícil; cada uno se desbloquea al terminar
+//  - El estudiante arma el circuito en una protoboard (reto 1). Lo que miden
+//    las puntas sale de resolver el circuito tal como quedó armado: análisis
+//    nodal con fasores (números complejos) para cada armónico de la señal.
+//  - 7 retos guiados, de fácil a difícil; cada uno se desbloquea al terminar
 //    el anterior. Se revisan solos cada vez que algo cambia en la mesa.
 //  - La mesa y el avance se guardan en este dispositivo.
 //  - Atajo para revisar: simulador4.html?reto=5 abre directo en el reto 5
@@ -30,11 +31,85 @@
   function angulo(a) { return Math.atan2(a[1], a[0]); }
   // R en paralelo con C: R / (1 + jωRC)
   function paralelo(R, C, w) { return entre([R, 0], [1, w * R * C]); }
-  // Para una frecuencia: h = Vout / Vin y carga = Vin / (voltaje interno del generador)
+  // Circuito bien armado, a una frecuencia: h = Vout / Vin y carga = Vin / (voltaje interno del generador).
+  // Es la teoría con la que se revisan los retos 2 a 7.
   function circuito(f) {
     const w = 2 * Math.PI * f;
     const z1 = paralelo(R1, C1, w), z2 = paralelo(R2, C2, w), zin = suma(z1, z2);
     return { h: entre(z2, zin), carga: entre(zin, suma(zin, [RS, 0])) };
+  }
+  function resta(a, b) { return [a[0] - b[0], a[1] - b[1]]; }
+  function por(a, b) { return [a[0] * b[0] - a[1] * b[1], a[0] * b[1] + a[1] * b[0]]; }
+  // Resuelve A·x = b con números complejos (eliminación de Gauss con pivoteo)
+  function gauss(A, b) {
+    const n = b.length;
+    for (let k = 0; k < n; k++) {
+      let m = k;
+      for (let i = k + 1; i < n; i++) if (modulo(A[i][k]) > modulo(A[m][k])) m = i;
+      let t = A[k]; A[k] = A[m]; A[m] = t;
+      t = b[k]; b[k] = b[m]; b[m] = t;
+      for (let i = k + 1; i < n; i++) {
+        const f = entre(A[i][k], A[k][k]);
+        for (let j = k; j < n; j++) A[i][j] = resta(A[i][j], por(f, A[k][j]));
+        b[i] = resta(b[i], por(f, b[k]));
+      }
+    }
+    const x = [];
+    for (let k = n - 1; k >= 0; k--) {
+      let s = b[k];
+      for (let j = k + 1; j < n; j++) s = resta(s, por(A[k][j], x[j]));
+      x[k] = entre(s, A[k][k]);
+    }
+    return x;
+  }
+
+  // ---------- 1b. La protoboard ----------
+  // 8 columnas de 5 huecos (los 5 huecos de una columna están unidos por dentro)
+  // y dos rieles a lo largo: + arriba y − abajo. En cada hueco cabe una sola pata.
+  // Huecos: 'c3-2' = columna 3, fila 2 · 'p5' = riel +, hueco 5 · 'n5' = riel −, hueco 5
+  const COLS = 8, FILAS = 5;
+  const PB = { x0: 34, dx: 40, yP: 32, yNum: 64, y0: 88, dy: 36, yN: 274, w: 348, h: 304 };
+  const BASES = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', '+', '−'];
+  const PIEZAS = [
+    { id: 'R1', tipo: 'r', patas: 2, nombre: 'R₁', valor: '1 kΩ', largo: 'R₁ (1 kΩ)', bandas: ['#7a4a1d', '#1d2230', '#d93025', '#c9a227'] },
+    { id: 'C1', tipo: 'c', patas: 2, nombre: 'C₁', valor: '1 nF · 102', largo: 'C₁ (1 nF)' },
+    { id: 'R2', tipo: 'r', patas: 2, nombre: 'R₂', valor: '10 kΩ', largo: 'R₂ (10 kΩ)', bandas: ['#7a4a1d', '#1d2230', '#f08a3c', '#c9a227'] },
+    { id: 'C2', tipo: 'c', patas: 2, nombre: 'C₂', valor: '10 nF · 103', largo: 'C₂ (10 nF)' },
+    { id: 'W1', tipo: 'w', patas: 2, nombre: 'Cable 1', valor: 'puente', largo: 'el cable puente 1', color: '#1f9d55' },
+    { id: 'W2', tipo: 'w', patas: 2, nombre: 'Cable 2', valor: 'puente', largo: 'el cable puente 2', color: '#7b4fd0' },
+    { id: 'GP', tipo: 'g', patas: 1, nombre: 'Rojo +', valor: 'generador', largo: 'el caimán rojo del generador', color: '#d93025', letra: '+' },
+    { id: 'GN', tipo: 'g', patas: 1, nombre: 'Negro −', valor: 'generador', largo: 'el caimán negro del generador', color: '#1d2230', letra: '−' },
+    { id: 'P1', tipo: 'p', patas: 1, nombre: 'Punta CH1', valor: 'gancho', largo: 'la punta de CH1', color: AMARILLO, letra: '1' },
+    { id: 'T1', tipo: 't', patas: 1, nombre: 'Tierra CH1', valor: 'caimán', largo: 'la tierra de CH1', color: AMARILLO },
+    { id: 'P2', tipo: 'p', patas: 1, nombre: 'Punta CH2', valor: 'gancho', largo: 'la punta de CH2', color: AZUL, letra: '2' },
+    { id: 'T2', tipo: 't', patas: 1, nombre: 'Tierra CH2', valor: 'caimán', largo: 'la tierra de CH2', color: AZUL }
+  ];
+  const PIEZA = {};
+  PIEZAS.forEach(function (p) { PIEZA[p.id] = p; });
+  // Una forma correcta de armarlo (la usa el atajo ?reto=)
+  const ARMADO = { R1: ['c2-2', 'c5-2'], C1: ['c2-3', 'c5-3'], R2: ['c5-4', 'n4'], C2: ['c5-5', 'n6'],
+                   GP: ['c2-1'], GN: ['n1'], P1: ['c2-4'], T1: ['n2'], P2: ['c5-1'], T2: ['n8'] };
+
+  function huecoValido(h) { return /^c[1-8]-[1-5]$/.test(h) || /^[pn][1-8]$/.test(h); }
+  function posHueco(h) {
+    const m = /^c(\d)-(\d)$/.exec(h);
+    if (m) return { x: PB.x0 + (m[1] - 1) * PB.dx, y: PB.y0 + (m[2] - 1) * PB.dy };
+    return { x: PB.x0 + (h.slice(1) - 1) * PB.dx, y: h[0] === 'p' ? PB.yP : PB.yN };
+  }
+  function baseDe(h) { return h[0] === 'c' ? h.split('-')[0] : (h[0] === 'p' ? '+' : '−'); }
+  function nombreBase(b) { return b === '+' ? 'el riel +' : b === '−' ? 'el riel −' : 'la columna ' + b.slice(1); }
+  // Quita lo que no tenga sentido de una protoboard guardada
+  function protoLimpio(p) {
+    const limpio = {}, usados = {};
+    if (!p || typeof p !== 'object') return limpio;
+    PIEZAS.forEach(function (pz) {
+      const v = p[pz.id];
+      if (!Array.isArray(v) || v.length !== pz.patas || !v.every(huecoValido) || v[0] === v[1]) return;
+      if (v.some(function (h) { return usados[h]; })) return;
+      v.forEach(function (h) { usados[h] = true; });
+      limpio[pz.id] = v.slice();
+    });
+    return limpio;
   }
 
   // ---------- 2. Posiciones de las perillas ----------
@@ -60,7 +135,8 @@
       tdiv: 11,
       medir: { ch1: false, ch2: false, frec: false },
       cursor: { on: false, c1: 3, c2: 7, sel: 1 },   // posición de los cursores en cuadros (0 a 10)
-      menu: null
+      menu: null,
+      proto: {}   // pieza → huecos donde están sus patas, p. ej. R1: ['c2-2', 'c5-2']
     };
   }
   function leer(clave) {
@@ -77,6 +153,7 @@
       if (guardada[k] === undefined) return;
       mesa[k] = (typeof mesa[k] === 'object' && mesa[k] !== null) ? Object.assign(mesa[k], guardada[k]) : guardada[k];
     });
+    mesa.proto = protoLimpio(mesa.proto);
   })();
   function guardarMesa() { escribir(CLAVE_MESA, mesa); }
 
@@ -87,7 +164,59 @@
   function vdiv(ch) { return VDIV[mesa.vdiv[ch]] * mesa.sonda[ch]; }  // V/div que dice la pantalla
   function tdiv() { return TDIV[mesa.tdiv]; }
 
-  // ---------- 4. Señales: Vin y Vout de verdad, armónico por armónico ----------
+  // ---------- 4. El circuito tal como quedó en la protoboard ----------
+  // Une los huecos que quedan conectados: cada columna, cada riel y los cables puente.
+  // Con conTierra, también une a "tierra" lo que toca el caimán negro y las pinzas de tierra
+  // de las puntas: por dentro del generador y del osciloscopio todas esas tierras están unidas.
+  function redesProto(conTierra) {
+    const padre = {};
+    function raiz(a) { while (padre[a] !== undefined) a = padre[a]; return a; }
+    function unir(a, b) { a = raiz(a); b = raiz(b); if (a !== b) padre[a] = b; }
+    ['W1', 'W2'].forEach(function (id) {
+      const p = mesa.proto[id];
+      if (p) unir(baseDe(p[0]), baseDe(p[1]));
+    });
+    if (conTierra) ['GN', 'T1', 'T2'].forEach(function (id) {
+      const p = mesa.proto[id];
+      if (p) unir(baseDe(p[0]), 'tierra');
+    });
+    return { de: function (h) { return raiz(baseDe(h)); }, base: raiz };
+  }
+  // Voltaje en cada punta por cada voltio interno del generador, a la frecuencia angular w (w = 0: continua).
+  // Análisis nodal: Y·V = I, con el generador como fuente de corriente en paralelo con sus 50 Ω.
+  function resolverProto(w) {
+    const p = mesa.proto, R = redesProto(true), indice = {};
+    let n = 0;
+    function nodo(h) {
+      const r = R.de(h);
+      if (r === 'tierra') return -1;
+      if (indice[r] === undefined) indice[r] = n++;
+      return indice[r];
+    }
+    const ramas = [];
+    [['R1', 1 / R1, 0], ['C1', 0, C1], ['R2', 1 / R2, 0], ['C2', 0, C2]].forEach(function (q) {
+      if (p[q[0]]) ramas.push([nodo(p[q[0]][0]), nodo(p[q[0]][1]), [q[1], w * q[2]]]);
+    });
+    const g = p.GP ? nodo(p.GP[0]) : -2, s1 = p.P1 ? nodo(p.P1[0]) : -2, s2 = p.P2 ? nodo(p.P2[0]) : -2;
+    const Y = [], I = [];
+    for (let i = 0; i < n; i++) {
+      Y.push([]);
+      for (let j = 0; j < n; j++) Y[i].push([i === j ? 1e-12 : 0, 0]);   // fuga mínima: un nodo suelto queda en 0 V
+      I.push([0, 0]);
+    }
+    ramas.forEach(function (r) {
+      const a = r[0], b = r[1], y = r[2];
+      if (a === b) return;   // las dos patas en el mismo nodo: en corto, no hace nada
+      if (a >= 0) Y[a][a] = suma(Y[a][a], y);
+      if (b >= 0) Y[b][b] = suma(Y[b][b], y);
+      if (a >= 0 && b >= 0) { Y[a][b] = resta(Y[a][b], y); Y[b][a] = resta(Y[b][a], y); }
+    });
+    if (g >= 0) { Y[g][g] = suma(Y[g][g], [1 / RS, 0]); I[g] = [1 / RS, 0]; }
+    const V = n ? gauss(Y, I) : [];
+    return { v1: s1 >= 0 ? V[s1] : [0, 0], v2: s2 >= 0 ? V[s2] : [0, 0] };
+  }
+
+  // ---------- 4b. Señales: lo que llega a cada punta, armónico por armónico ----------
   function senales() {
     const g = mesa.gen, f = frecuencia(), A = amplitud() / 2;
     if (!g.salida) return { f: f, vin: [], vout: [], dcIn: 0, dcOut: 0 };
@@ -102,16 +231,17 @@
     } else {
       for (let n = 1; n < 26; n += 2) arm.push([n, 8 * A / (Math.PI * Math.PI * n * n) * (((n - 1) / 2) % 2 ? -1 : 1)]);
     }
-    // El tiempo se cuenta desde Vin: su parte principal cruza por cero subiendo en t = 0
-    const ref = angulo(circuito(f).carga);
+    // El tiempo se cuenta desde lo que ve CH1 (el disparo): su parte principal cruza por cero subiendo en t = 0
+    const fund = resolverProto(2 * Math.PI * f);
+    const ref = angulo(modulo(fund.v1) > 1e-9 ? fund.v1 : (modulo(fund.v2) > 1e-9 ? fund.v2 : [1, 0]));
     const vin = [], vout = [];
     arm.forEach(function (p) {
-      const n = p[0], c = circuito(n * f), a = p[1] * modulo(c.carga), fi = angulo(c.carga) - n * ref;
-      vin.push({ n: n, a: a, fi: fi });
-      vout.push({ n: n, a: a * modulo(c.h), fi: fi + angulo(c.h) });
+      const n = p[0], c = n === 1 ? fund : resolverProto(2 * Math.PI * n * f);
+      vin.push({ n: n, a: p[1] * modulo(c.v1), fi: angulo(c.v1) - n * ref });
+      vout.push({ n: n, a: p[1] * modulo(c.v2), fi: angulo(c.v2) - n * ref });
     });
-    const dcIn = offset() * (R1 + R2) / (R1 + R2 + RS);
-    return { f: f, vin: vin, vout: vout, dcIn: dcIn, dcOut: dcIn * R2 / (R1 + R2) };
+    const dc = resolverProto(0);
+    return { f: f, vin: vin, vout: vout, dcIn: offset() * dc.v1[0], dcOut: offset() * dc.v2[0] };
   }
   function valor(lista, dc, f, t) {
     let v = dc;
@@ -216,12 +346,12 @@
     const filas = [];
     function pp(ch, color) {
       const c = r.ch[ch];
-      if (!r.hay) return [color, ch.toUpperCase() + ' Pk-Pk  ?'];
+      if (!r.hay || c.pp < 1e-4) return [color, ch.toUpperCase() + ' Pk-Pk  ?'];   // sin señal en esa punta
       return [color, ch.toUpperCase() + ' Pk-Pk  ' + voltios(c.pp) + (c.sale ? ' ?' : '')];
     }
     if (mesa.medir.ch1) filas.push(pp('ch1', AMARILLO));
     if (mesa.medir.ch2) filas.push(pp('ch2', AZUL));
-    if (mesa.medir.frec) filas.push(['#c9cfdb', 'CH1 Frec  ' + (r.hay && r.ciclos >= 1 ? frecTexto(r.f) : '?')]);
+    if (mesa.medir.frec) filas.push(['#c9cfdb', 'CH1 Frec  ' + (r.hay && r.ch.ch1.pp >= 1e-4 && r.ciclos >= 1 ? frecTexto(r.f) : '?')]);
     if (filas.length) {
       const alto = 10 + filas.length * 20;
       s += '<rect x="214" y="6" width="180" height="' + alto + '" rx="4" fill="#05121a" stroke="#4a5a64"/>';
@@ -449,44 +579,258 @@
     texto: function () { return mesa.cursor.on ? 'cursor ' + mesa.cursor.sel : 'apagados'; }
   });
 
-  // ---------- 11. El circuito y las puntas ----------
-  function dibujarCircuito() {
-    const g = 'fill="none" stroke="#1d2230" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"';
-    // Resistencia vertical (zigzag) y capacitor vertical (dos placas)
-    function rv(x, y) { return '<path d="M' + x + ' ' + y + ' v12 l-8 4 l16 8 l-16 8 l16 8 l-16 8 l16 8 l-8 4 v12" ' + g + '/>'; }
-    function cv(x, y) { return '<path d="M' + x + ' ' + y + ' v31 M' + (x - 14) + ' ' + (y + 31) + ' h28 M' + (x - 14) + ' ' + (y + 39) + ' h28 M' + x + ' ' + (y + 39) + ' v31" ' + g + '/>'; }
-    function bloque(y, r, rv1, c, cv1) {
-      return '<path d="M110 ' + y + ' H210 M110 ' + (y + 90) + ' H210 M110 ' + y + ' v10 M210 ' + y + ' v10 M110 ' + (y + 80) + ' v10 M210 ' + (y + 80) + ' v10" ' + g + '/>' +
-             rv(110, y + 10) + cv(210, y + 10) +
-             '<text x="94" y="' + (y + 42) + '" text-anchor="end" class="c-n">' + r + '</text><text x="94" y="' + (y + 60) + '" text-anchor="end" class="c-v">' + rv1 + '</text>' +
-             '<text x="230" y="' + (y + 42) + '" class="c-n">' + c + '</text><text x="230" y="' + (y + 60) + '" class="c-v">' + cv1 + '</text>';
-    }
+  // ---------- 11. Esquema, protoboard y puntas ----------
+  // Esquema de referencia (como el de la guía): Vin, R₁‖C₁ en serie con R₂‖C₂, CH1 en Vin y CH2 en Vout
+  function dibujarEsquema() {
+    const g = 'fill="none" stroke="#1d2230" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"';
     let s = '';
-    // Cable del generador: rojo a IN, negro a tierra
-    s += '<path d="M36 0 V34" stroke="#1d2230" stroke-width="7" stroke-linecap="round"/>' +
-         '<path d="M36 34 Q36 58 56 60" ' + g.replace('#1d2230', '#d93025') + '/><path d="M36 34 V370 H56" ' + g + '/>' +
-         '<text x="48" y="16" class="c-s">del generador (OUT)</text>';
-    s += '<circle cx="62" cy="60" r="6" fill="#f7f7f2" stroke="#1d2230" stroke-width="2.5"/><text x="62" y="84" text-anchor="middle" class="c-s">IN</text>';
-    s += '<path d="M68 60 H160 V100" ' + g + '/>' + bloque(100, 'R₁', '1 kΩ', 'C₁', '1 nF') + '<path d="M160 190 V240" ' + g + '/>' +
-         bloque(240, 'R₂', '10 kΩ', 'C₂', '10 nF') + '<path d="M160 330 V370 H68" ' + g + '/>';
-    s += '<circle cx="62" cy="370" r="6" fill="#f7f7f2" stroke="#1d2230" stroke-width="2.5"/><text x="62" y="394" text-anchor="middle" class="c-s">GND</text>';
-    // Puntos de prueba con las puntas: CH1 en Vin, CH2 en Vout
-    [[60, 'Vin', AMARILLO, 'a CH1'], [215, 'Vout', AZUL, 'a CH2']].forEach(function (p) {
-      const y = p[0];
-      s += '<circle cx="160" cy="' + y + '" r="4.5" fill="#1d2230"/><path d="M160 ' + y + ' H270" ' + g + '/>' +
-           '<circle cx="276" cy="' + y + '" r="6" fill="#f7f7f2" stroke="#1d2230" stroke-width="2.5"/>' +
-           '<circle cx="276" cy="' + y + '" r="11" fill="none" stroke="' + p[2] + '" stroke-width="4"/>' +
-           '<path d="M287 ' + y + ' H320" stroke="' + p[2] + '" stroke-width="5" stroke-linecap="round"/>' +
-           '<text x="262" y="' + (y - 16) + '" text-anchor="end" class="c-n">' + p[1] + '</text>' +
-           '<text x="318" y="' + (y + 24) + '" text-anchor="end" class="c-s">' + p[3] + '</text>';
-    });
-    // Pinzas de tierra de las dos puntas
-    s += '<rect x="196" y="364" width="16" height="12" rx="3" fill="#1d2230"/><rect x="228" y="364" width="16" height="12" rx="3" fill="#1d2230"/>' +
-         '<path d="M160 370 H250" ' + g + '/><text x="220" y="396" text-anchor="middle" class="c-s">tierra de las puntas</text>';
-    $('circuito').innerHTML = s;
+    s += '<circle cx="46" cy="112" r="17" ' + g + '/><path d="M36 112 C 40 102, 44 102, 46 112 S 52 122, 56 112" ' + g + '/>' +
+         '<text x="24" y="117" text-anchor="end" class="e-n">V<tspan dy="4" class="e-sub">in</tspan></text>';
+    s += '<path d="M46 95 V62 H138 l5 -7 l10 14 l10 -14 l10 14 l10 -14 l10 14 l5 -7 H316" ' + g + '/>';
+    s += '<path d="M120 62 V30 H164 M164 20 V40 M172 20 V40 M172 30 H216 V62" ' + g + '/>';
+    s += '<path d="M246 62 V84 l-7 5 l14 10 l-14 10 l14 10 l-14 10 l14 10 l-7 5 V156" ' + g + '/>';
+    s += '<path d="M284 62 V105 M272 105 H296 M272 113 H296 M284 113 V156" ' + g + '/>';
+    s += '<path d="M46 129 V156 H284 M110 156 V164 M100 164 H120 M104 169 H116 M108 174 H112" ' + g + '/>';
+    s += '<circle cx="246" cy="62" r="3.5" fill="#1d2230"/><circle cx="246" cy="156" r="3.5" fill="#1d2230"/>' +
+         '<circle cx="84" cy="62" r="5" fill="#1d63c4"/><circle cx="316" cy="62" r="5" fill="#1d63c4"/>';
+    s += '<text x="84" y="50" text-anchor="middle" class="e-ch">CH1</text><text x="316" y="50" text-anchor="middle" class="e-ch">CH2</text>' +
+         '<text x="316" y="86" text-anchor="middle" class="e-n">V<tspan dy="4" class="e-sub">out</tspan></text>' +
+         '<text x="168" y="15" text-anchor="middle" class="e-n">C₁ <tspan class="e-v">1 nF</tspan></text>' +
+         '<text x="168" y="88" text-anchor="middle" class="e-n">R₁ <tspan class="e-v">1 kΩ</tspan></text>' +
+         '<text x="234" y="108" text-anchor="end" class="e-n">R₂</text><text x="234" y="123" text-anchor="end" class="e-v">10 kΩ</text>' +
+         '<text x="300" y="108" class="e-n">C₂</text><text x="300" y="123" class="e-v">10 nF</text>' +
+         '<text x="178" y="150" text-anchor="middle" class="e-s">tierra común</text>';
+    $('esquema').innerHTML = s;
   }
+
+  // Estado mientras se arma: la pieza en la mano, la columna que se está mostrando y un aviso
+  let sel = null;        // { id, patas: [], antes } al poner una pieza · { id, mover: k } al mover una de sus patas
+  let mostrada = null;   // columna o riel resaltado al tocar un hueco vacío
+  let aviso = '';
+  function todosLosHuecos() {
+    const lista = [];
+    for (let c = 1; c <= COLS; c++) {
+      lista.push('p' + c, 'n' + c);
+      for (let f = 1; f <= FILAS; f++) lista.push('c' + c + '-' + f);
+    }
+    return lista;
+  }
+  // Qué pata está en un hueco (también la primera pata de la pieza que se está poniendo)
+  function ocupante(h) {
+    for (const id in mesa.proto) {
+      const k = mesa.proto[id].indexOf(h);
+      if (k >= 0) return { id: id, k: k };
+    }
+    if (sel && sel.patas && sel.patas.indexOf(h) >= 0) return { id: sel.id, k: 0, mano: true };
+    return null;
+  }
+  function tituloHueco(h) {
+    if (h[0] === 'c') { const m = h.split('-'); return 'Columna ' + m[0].slice(1) + ', hueco ' + m[1]; }
+    return 'Riel ' + (h[0] === 'p' ? '+' : '−') + ', hueco ' + h.slice(1);
+  }
+
+  // Dibujos de cada pieza
+  function simboloTierra(x, y, color) {
+    return '<path d="M' + x + ' ' + (y - 4) + ' v3 M' + (x - 4.5) + ' ' + (y - 1) + ' h9 M' + (x - 3) + ' ' + (y + 2) + ' h6 M' + (x - 1.2) + ' ' + (y + 5) + ' h2.4" stroke="' + color + '" stroke-width="1.5" stroke-linecap="round" fill="none"/>';
+  }
+  function cabeza(pz, x, y, r) {
+    if (pz.tipo === 't') return '<circle cx="' + x + '" cy="' + y + '" r="' + r + '" fill="#1d2230" stroke="' + pz.color + '" stroke-width="3"/>' + simboloTierra(x, y, '#ffffff');
+    const letra = pz.tipo === 'g' ? '#ffffff' : '#1d2230';
+    return '<circle cx="' + x + '" cy="' + y + '" r="' + r + '" fill="' + pz.color + '" stroke="#1d2230" stroke-width="1.5"/>' +
+           '<text x="' + x + '" y="' + (y + 4) + '" text-anchor="middle" class="pb-letra" style="fill:' + letra + '">' + pz.letra + '</text>';
+  }
+  function cuerpo(pz, x, y, ang) {
+    if (pz.tipo === 'c') return '<circle cx="' + x + '" cy="' + y + '" r="9" fill="#e39a35" stroke="#a8641a" stroke-width="1.5"/>';
+    let s = '<g transform="translate(' + x + ' ' + y + ') rotate(' + ang + ')"><rect x="-14" y="-6" width="28" height="12" rx="6" fill="#e8d2a2" stroke="#a88b55" stroke-width="1.2"/>';
+    [-9, -4, 1, 8].forEach(function (bx, i) { s += '<rect x="' + bx + '" y="-6" width="3" height="12" fill="' + pz.bandas[i] + '"/>'; });
+    return s + '</g>';
+  }
+  function icono(pz) {
+    let s = '';
+    if (pz.tipo === 'r' || pz.tipo === 'c') s = '<line x1="1" y1="9" x2="29" y2="9" stroke="#8e95a3" stroke-width="2"/>' + (pz.tipo === 'c'
+      ? '<circle cx="15" cy="9" r="6.5" fill="#e39a35" stroke="#a8641a" stroke-width="1.2"/>'
+      : '<rect x="6" y="4" width="18" height="10" rx="5" fill="#e8d2a2" stroke="#a88b55"/>' +
+        [9, 13, 17, 21].map(function (bx, i) { return '<rect x="' + bx + '" y="4" width="2" height="10" fill="' + pz.bandas[i] + '"/>'; }).join(''));
+    else if (pz.tipo === 'w') s = '<path d="M3 14 Q15 -3 27 14" fill="none" stroke="' + pz.color + '" stroke-width="3.2" stroke-linecap="round"/>';
+    else s = cabeza(pz, 15, 9, 7.5);
+    return '<svg viewBox="0 0 30 18" aria-hidden="true">' + s + '</svg>';
+  }
+  // Cable que sale de un caimán o de una punta hacia el borde más cercano (al equipo)
+  function cableAfuera(pz, a) {
+    const der = a.x > PB.w / 2, ex = der ? PB.w + 6 : -6, ey = Math.min(PB.h - 4, a.y + 30);
+    const d = 'M' + a.x + ' ' + a.y + ' C ' + (a.x + (der ? 30 : -30)) + ' ' + (a.y + 4) + ', ' + (ex + (der ? -24 : 24)) + ' ' + ey + ', ' + ex + ' ' + ey;
+    const color = pz.tipo === 't' ? '#1d2230' : pz.color;
+    return '<path d="' + d + '" fill="none" stroke="#1d2230" stroke-width="5.5" stroke-linecap="round" opacity=".85"/>' +
+           '<path d="' + d + '" fill="none" stroke="' + color + '" stroke-width="3.2" stroke-linecap="round"/>';
+  }
+  function etiqueta(texto, x, y) {
+    return '<text x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" text-anchor="middle" class="pb-et">' + texto + '</text>';
+  }
+
+  function dibujarProto() {
+    const W = PB.w, H = PB.h, luz = {};
+    if (mostrada) luz[mostrada] = true;
+    let s = '<rect x="1" y="1" width="' + (W - 2) + '" height="' + (H - 2) + '" rx="12" fill="#f4f2ea" stroke="#c9ced8" stroke-width="2"/>';
+    // Rieles: + arriba (línea roja) y − abajo (línea azul), unidos a lo largo
+    [['+', PB.yP, '#d93025', -12], ['−', PB.yN, '#1d63c4', 12]].forEach(function (r) {
+      s += '<rect x="16" y="' + (r[1] - 15) + '" width="' + (W - 32) + '" height="30" rx="6" fill="' + (luz[r[0]] ? '#cfe0fb' : '#e9e6dc') + '"/>' +
+           '<line x1="20" y1="' + (r[1] + r[3]) + '" x2="' + (W - 20) + '" y2="' + (r[1] + r[3]) + '" stroke="' + r[2] + '" stroke-width="2"/>' +
+           '<text x="9" y="' + (r[1] + 6) + '" text-anchor="middle" class="pb-riel" style="fill:' + r[2] + '">' + r[0] + '</text>';
+    });
+    // Columnas: cada una con sus 5 huecos unidos por dentro
+    for (let c = 1; c <= COLS; c++) {
+      const x = PB.x0 + (c - 1) * PB.dx;
+      s += '<rect x="' + (x - 15) + '" y="' + (PB.y0 - 16) + '" width="30" height="' + ((FILAS - 1) * PB.dy + 32) + '" rx="8" fill="' + (luz['c' + c] ? '#cfe0fb' : '#e9e6dc') + '"/>' +
+           '<text x="' + x + '" y="' + PB.yNum + '" text-anchor="middle" class="pb-num">' + c + '</text>';
+    }
+    todosLosHuecos().forEach(function (h) {
+      const q = posHueco(h);
+      s += '<rect x="' + (q.x - 4.5) + '" y="' + (q.y - 4.5) + '" width="9" height="9" rx="2" fill="#4a4f5c"/>';
+      if (sel && sel.patas && !ocupante(h)) s += '<circle cx="' + q.x + '" cy="' + q.y + '" r="9" fill="none" stroke="#1d63c4" stroke-width="1.5" opacity=".35"/>';
+    });
+    // Piezas puestas y la que se está poniendo (si ya tiene su primera pata)
+    const puestas = [];
+    PIEZAS.forEach(function (pz) { if (mesa.proto[pz.id]) puestas.push([pz, mesa.proto[pz.id]]); });
+    if (sel && sel.patas && sel.patas.length) puestas.push([PIEZA[sel.id], sel.patas]);
+    let capas = ['', '', '', ''];   // 0 patas y cables puente · 1 cuerpos y nombres · 2 cables al equipo · 3 caimanes y puntas
+    puestas.forEach(function (it) {
+      const pz = it[0], v = it[1], a = posHueco(v[0]);
+      if (pz.patas === 1) { capas[2] += cableAfuera(pz, a); capas[3] += cabeza(pz, a.x, a.y, 8.5); return; }
+      if (v.length === 1) {   // pieza a medio poner: solo tiene la primera pata
+        capas[3] += '<circle cx="' + a.x + '" cy="' + a.y + '" r="11" fill="none" stroke="#1d63c4" stroke-width="3"/><circle cx="' + a.x + '" cy="' + a.y + '" r="4" fill="#8e95a3"/>' +
+                    etiqueta(pz.nombre, a.x, a.y - 16);
+        return;
+      }
+      const b = posHueco(v[1]), mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+      if (pz.tipo === 'w') {
+        capas[0] += '<path d="M' + a.x + ' ' + a.y + ' Q ' + mx + ' ' + (my - 18) + ' ' + b.x + ' ' + b.y + '" fill="none" stroke="' + pz.color + '" stroke-width="4" stroke-linecap="round"/>' +
+                    '<circle cx="' + a.x + '" cy="' + a.y + '" r="3.5" fill="' + pz.color + '"/><circle cx="' + b.x + '" cy="' + b.y + '" r="3.5" fill="' + pz.color + '"/>';
+        return;
+      }
+      let ang = Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI;
+      if (ang > 90) ang -= 180; else if (ang < -90) ang += 180;
+      const rad = ang * Math.PI / 180, nx = Math.sin(rad), ny = -Math.cos(rad);   // perpendicular, hacia arriba
+      capas[0] += '<line x1="' + a.x + '" y1="' + a.y + '" x2="' + b.x + '" y2="' + b.y + '" stroke="#8e95a3" stroke-width="2.2" stroke-linecap="round"/>' +
+                  '<circle cx="' + a.x + '" cy="' + a.y + '" r="3" fill="#8e95a3"/><circle cx="' + b.x + '" cy="' + b.y + '" r="3" fill="#8e95a3"/>';
+      capas[1] += cuerpo(pz, mx, my, ang) + etiqueta(pz.nombre, mx + nx * 17, my + ny * 17 + 4);
+    });
+    s += capas.join('');
+    // Lo que se está moviendo: anillo naranja en la pata elegida
+    if (sel && sel.mover !== undefined) {
+      const q = posHueco(mesa.proto[sel.id][sel.mover]);
+      s += '<circle cx="' + q.x + '" cy="' + q.y + '" r="12" fill="none" stroke="' + NARANJA + '" stroke-width="3"/>';
+    }
+    // Zonas para tocar cada hueco
+    todosLosHuecos().forEach(function (h) {
+      const q = posHueco(h);
+      s += '<circle data-hueco="' + h + '" cx="' + q.x + '" cy="' + q.y + '" r="17" fill="transparent"><title>' + tituloHueco(h) + '</title></circle>';
+    });
+    return s;
+  }
+
+  $('bandeja').innerHTML = [['Piezas', ['R1', 'C1', 'R2', 'C2', 'W1', 'W2']], ['Generador', ['GP', 'GN']], ['Osciloscopio', ['P1', 'T1', 'P2', 'T2']]].map(function (grupo) {
+    return '<div class="bandeja-grupo"><span class="grupo-t">' + grupo[0] + '</span><div class="bandeja-botones">' +
+      grupo[1].map(function (id) {
+        const pz = PIEZA[id];
+        return '<button class="pieza" data-pieza="' + id + '" aria-pressed="false">' + icono(pz) +
+               '<span class="pieza-txt"><b>' + pz.nombre + '</b><small>' + pz.valor + '</small></span></button>';
+      }).join('') + '</div></div>';
+  }).join('');
+
+  function textoEstado() {
+    if (aviso) return aviso;
+    if (sel && sel.mover !== undefined) return 'Moviendo una pata de ' + PIEZA[sel.id].largo + ': toca el hueco nuevo, o la misma pata para dejarla donde estaba.';
+    if (sel) {
+      const pz = PIEZA[sel.id];
+      if (pz.patas === 1) return 'Toca el hueco donde va ' + pz.largo + '.';
+      return pz.largo.charAt(0).toUpperCase() + pz.largo.slice(1) + ': toca el hueco de la ' + (sel.patas.length ? 'segunda' : 'primera') + ' pata.';
+    }
+    if (mostrada) return mostrada.length === 1
+      ? 'El riel ' + mostrada + ' está unido a lo largo: todo lo que pongas en él queda conectado.'
+      : 'Los 5 huecos de la columna ' + mostrada.slice(1) + ' están unidos por dentro: lo que pongas en ellos queda conectado.';
+    return 'Toca una pieza de la bandeja y luego el hueco de cada pata. Para mover algo, toca su pata en la protoboard.';
+  }
+  function pintarProto() {
+    $('proto').innerHTML = dibujarProto();
+    document.querySelectorAll('[data-pieza]').forEach(function (b) {
+      const id = b.dataset.pieza, mano = !!sel && sel.id === id;
+      b.classList.toggle('puesta', !!mesa.proto[id]);
+      b.classList.toggle('elegida', mano);
+      b.setAttribute('aria-pressed', mano ? 'true' : 'false');
+    });
+    $('proto-estado').textContent = textoEstado();
+    $('btn-quitar').disabled = !(sel && (sel.mover !== undefined || sel.antes));
+    $('btn-vaciar-proto').disabled = !sel && !Object.keys(mesa.proto).length;
+  }
+  // Suelta la pieza que está en la mano; si se estaba moviendo, vuelve a donde estaba
+  function soltar() {
+    if (!sel) return false;
+    const volver = sel.antes && !mesa.proto[sel.id];
+    if (volver) mesa.proto[sel.id] = sel.antes;
+    sel = null;
+    return volver;
+  }
+  $('bandeja').addEventListener('click', function (evento) {
+    const b = evento.target.closest('[data-pieza]');
+    if (!b) return;
+    const id = b.dataset.pieza, misma = sel && sel.id === id;
+    aviso = '';
+    mostrada = null;
+    soltar();
+    if (!misma) {
+      // Al tocar una pieza que ya estaba puesta, se levanta para ponerla en otro lado
+      sel = { id: id, patas: [], antes: mesa.proto[id] || null };
+      delete mesa.proto[id];
+    }
+    cambio();
+  });
+  function tocarHueco(h) {
+    const o = ocupante(h);
+    aviso = '';
+    if (sel && sel.mover !== undefined) {
+      if (o && o.id === sel.id && o.k === sel.mover) sel = null;
+      else if (o) aviso = 'Ese hueco ya tiene una pata de ' + PIEZA[o.id].nombre + '. Elige uno libre.';
+      else { mesa.proto[sel.id][sel.mover] = h; sel = null; }
+    } else if (sel) {
+      if (o) aviso = o.mano ? 'Ahí ya está la primera pata. Toca otro hueco para la segunda.' : 'Ese hueco ya tiene una pata de ' + PIEZA[o.id].nombre + '. Elige uno libre.';
+      else {
+        sel.patas.push(h);
+        if (sel.patas.length === PIEZA[sel.id].patas) { mesa.proto[sel.id] = sel.patas; sel = null; }
+      }
+    } else if (o) {
+      sel = { id: o.id, mover: o.k };
+      mostrada = null;
+    } else {
+      mostrada = mostrada === baseDe(h) ? null : baseDe(h);
+    }
+    cambio();
+  }
+  $('proto').addEventListener('click', function (evento) {
+    const t = evento.target.closest('[data-hueco]');
+    if (t) tocarHueco(t.dataset.hueco);
+  });
+  $('btn-quitar').addEventListener('click', function () {
+    if (!sel) return;
+    delete mesa.proto[sel.id];
+    sel = null;
+    aviso = '';
+    cambio();
+  });
+  $('btn-vaciar-proto').addEventListener('click', function () {
+    mesa.proto = {};
+    sel = null;
+    aviso = '';
+    mostrada = null;
+    cambio();
+  });
+  document.addEventListener('keydown', function (evento) {
+    if (evento.key === 'Escape' && sel) { soltar(); aviso = ''; cambio(); }
+  });
+
+  // Interruptor ×1 / ×10 de cada punta y dónde quedó enganchada
   $('puntas4').innerHTML = ['ch1', 'ch2'].map(function (ch) {
-    return '<div class="punta4 ' + ch + '"><span class="punta-nombre"><i aria-hidden="true"></i>Punta de ' + ch.toUpperCase() + '</span>' +
+    return '<div class="punta4 ' + ch + '"><span class="punta-nombre"><i aria-hidden="true"></i><span>Punta de ' + ch.toUpperCase() +
+           '<small id="donde-' + ch + '"></small></span></span>' +
            '<button class="interruptor" data-punta="' + ch + '" aria-label="Interruptor de la punta de ' + ch.toUpperCase() + '">' +
            '<span data-x="1">×1</span><span data-x="10">×10</span></button></div>';
   }).join('');
@@ -504,9 +848,13 @@
       b.setAttribute('aria-valuetext', '×' + x);
       b.title = 'Ahora en ×' + x + ' (toca para cambiar)';
     });
+    [['ch1', 'P1'], ['ch2', 'P2']].forEach(function (q) {
+      const p = mesa.proto[q[1]];
+      $('donde-' + q[0]).textContent = p ? 'enganchada en ' + nombreBase(baseDe(p[0])) : 'sin conectar';
+    });
   }
 
-  // ---------- 12. Los 6 retos ----------
+  // ---------- 12. Los 7 retos ----------
   // Dibujitos del mapa (el CSS de .mini-esq pinta los textos de negro; por eso llevan style)
   function onda(x0, w, cy, a, fase, color, ciclos) {
     let p = '';
@@ -515,7 +863,22 @@
   }
   function mini(cuerpo) { return '<svg class="mini-esq" viewBox="0 0 220 130" aria-hidden="true">' + cuerpo + '</svg>'; }
   const NEGRO = '<rect x="10" y="10" width="200" height="110" rx="10" fill="#05121a"/>';
+  // Protoboard pequeña: rieles, huecos, R₁ y C₁ en paralelo y dos puntas
+  const MINI_PROTO = (function () {
+    let s = '<rect x="14" y="14" width="192" height="102" rx="10" fill="#f4f2ea" stroke="#c9ced8" stroke-width="2"/>' +
+            '<line x1="24" y1="24" x2="196" y2="24" stroke="#d93025" stroke-width="2"/><line x1="24" y1="108" x2="196" y2="108" stroke="#1d63c4" stroke-width="2"/>';
+    for (let c = 0; c < 8; c++) {
+      s += '<rect x="' + (31 + c * 22) + '" y="98" width="5" height="5" rx="1" fill="#4a4f5c"/>';
+      for (let f = 0; f < 4; f++) s += '<rect x="' + (31 + c * 22) + '" y="' + (36 + f * 16) + '" width="5" height="5" rx="1" fill="#4a4f5c"/>';
+    }
+    return s + '<line x1="55" y1="54" x2="143" y2="54" stroke="#8e95a3" stroke-width="2.5"/><rect x="85" y="48" width="28" height="12" rx="6" fill="#e8d2a2" stroke="#a88b55"/>' +
+           '<rect x="90" y="48" width="3" height="12" fill="#7a4a1d"/><rect x="95" y="48" width="3" height="12" fill="#1d2230"/><rect x="100" y="48" width="3" height="12" fill="#d93025"/>' +
+           '<line x1="55" y1="70" x2="143" y2="70" stroke="#8e95a3" stroke-width="2.5"/><circle cx="99" cy="70" r="8" fill="#e39a35" stroke="#a8641a" stroke-width="1.5"/>' +
+           '<circle cx="55" cy="38" r="7" fill="#d93025" stroke="#1d2230" stroke-width="1.5"/><circle cx="55" cy="86" r="7" fill="' + AMARILLO + '" stroke="#1d2230" stroke-width="1.5"/>' +
+           '<circle cx="143" cy="38" r="7" fill="' + AZUL + '" stroke="#1d2230" stroke-width="1.5"/>';
+  })();
   const MINIS = [
+    mini(MINI_PROTO),
     mini('<rect x="20" y="22" width="180" height="86" rx="10" fill="#c9ced8"/><rect x="32" y="34" width="156" height="34" rx="5" fill="#1a0606"/>' +
          '<text x="180" y="59" text-anchor="end" style="fill:#ff4a3a;font-family:Courier New,monospace;font-size:20px">24.60 kHz</text>' + onda(40, 90, 90, 9, 0, '#1d2230') +
          '<rect x="146" y="80" width="38" height="18" rx="5" fill="#1d63c4"/><text x="165" y="93" text-anchor="middle" style="fill:white;font-size:10px">ON</text>'),
@@ -551,12 +914,12 @@
   }
   function puntasBien() { return mesa.puntas.ch1 === 10 && mesa.puntas.ch2 === 10 && mesa.sonda.ch1 === 10 && mesa.sonda.ch2 === 10; }
   function vinBien(r) { const c = r.ch.ch1; return !c.sale && c.pp >= 1.9 && c.pp <= 2.1; }
-  // Primer paso de los retos 4 y 5: que la mesa siga como quedó en los anteriores
+  // Primer paso de los retos 5 y 6: que la mesa siga como quedó en los anteriores
   function base(r) {
     let pista = null;
-    if (!genEn(24600)) pista = 'Deja el generador como en el reto 1: senoidal, 24,6 kHz, OUTPUT ON y OFFSET en 0 V.';
-    else if (!puntasBien()) pista = 'Las dos puntas y los dos menús deben estar en ×10 (reto 2).';
-    else if (!vinBien(r)) pista = 'CH1 debe marcar 2 Vpp (entre 1,90 y 2,10 V): ajusta AMPL como en el reto 3.';
+    if (!genEn(24600)) pista = 'Deja el generador como en el reto 2: senoidal, 24,6 kHz, OUTPUT ON y OFFSET en 0 V.';
+    else if (!puntasBien()) pista = 'Las dos puntas y los dos menús deben estar en ×10 (reto 3).';
+    else if (!vinBien(r)) pista = 'CH1 debe marcar 2 Vpp (entre 1,90 y 2,10 V): ajusta AMPL como en el reto 4.';
     return { ok: !pista, texto: 'Generador en 24,6 kHz, puntas en ×10 y CH1 en 2 Vpp', pista: pista };
   }
   function pistaVolts(c, ch, nombre) {
@@ -567,7 +930,115 @@
 
   const FRECS = [[2460, '1', '2,46 kHz', '1k', '5 µs'], [24600, '2', '24,6 kHz', '10k', '5 µs'], [246000, '3', '246 kHz', '100k', '250 ns']];
 
+  // Revisión del armado en la protoboard. Aquí no se juntan las tierras internas de los equipos,
+  // para poder decir dónde quedó cada caimán y cada pinza.
+  function revisarArmado() {
+    const p = mesa.proto, R = redesProto(false);
+    const red = function (id, k) { return p[id] ? R.de(p[id][k || 0]) : null; };
+    const miembros = {};
+    BASES.forEach(function (b) { const r = R.base(b); (miembros[r] = miembros[r] || []).push(b); });
+    function nombre(r) { return (miembros[r] || [r]).map(nombreBase).join(' y '); }
+    function paralelo(x, y) {
+      const N = PIEZA[x].nombre, M = PIEZA[y].nombre, texto = N + ' y ' + M + ' en paralelo';
+      const enCorto = [x, y].filter(function (id) { return p[id] && red(id, 0) === red(id, 1); })[0];
+      if (enCorto) {
+        const K = PIEZA[enCorto].nombre;
+        return { ok: false, error: true, texto: texto, pista: K + ' tiene las dos patas en ' + nombre(red(enCorto, 0)) + '. Ahí todo está unido por dentro, así que ' + K + ' queda en corto: pon cada pata en una columna distinta.' };
+      }
+      if (!p[x] || !p[y]) return { ok: false, texto: texto, pista: 'Toca ' + (p[x] ? M : N) + ' en la bandeja y luego dos huecos de columnas distintas.' };
+      const A = [red(x, 0), red(x, 1)], B = [red(y, 0), red(y, 1)];
+      if (B.indexOf(A[0]) < 0 || B.indexOf(A[1]) < 0) {
+        return { ok: false, error: true, texto: texto, pista: 'Todavía no están en paralelo: ' + N + ' y ' + M + ' deben tener sus patas en las mismas dos columnas, una pata de cada una en cada columna.' };
+      }
+      return { ok: true, texto: texto, nodos: A };
+    }
+    const par1 = paralelo('R1', 'C1'), par2 = paralelo('R2', 'C2');
+    const a = { lista: [par1, par2], nombre: nombre, vin: null, vout: null, gnd: null };
+    const serie = { ok: false, texto: 'R₁‖C₁ en serie con R₂‖C₂' };
+    if (!par1.ok || !par2.ok) serie.pista = 'Primero deja listos los dos pares en paralelo.';
+    else {
+      const comunes = par1.nodos.filter(function (n) { return par2.nodos.indexOf(n) >= 0; });
+      if (comunes.length === 1) {
+        serie.ok = true;
+        a.vout = comunes[0];
+        a.vin = par1.nodos[0] === a.vout ? par1.nodos[1] : par1.nodos[0];
+        a.gnd = par2.nodos[0] === a.vout ? par2.nodos[1] : par2.nodos[0];
+      } else if (comunes.length === 2) {
+        serie.error = true;
+        serie.pista = 'Los cuatro quedaron en paralelo: R₂‖C₂ está en las mismas dos columnas que R₁‖C₁. Deben compartir solo una columna, que será Vout.';
+      } else serie.pista = 'Une los dos pares: R₂‖C₂ debe tener una columna en común con R₁‖C₁. Esa columna común es Vout.';
+    }
+    a.lista.push(serie);
+    const listo = serie.ok, falta = 'Primero arma R₁‖C₁ en serie con R₂‖C₂.';
+    // Generador: el rojo entra por R₁‖C₁ y el negro va a la tierra del circuito
+    const gen = { ok: false, texto: 'Generador: rojo en Vin y negro en tierra', pista: falta };
+    if (listo) {
+      const rp = red('GP'), rn = red('GN');
+      if (p.GP && p.GN && rp === rn) {
+        gen.error = true;
+        gen.pista = 'Los dos caimanes del generador quedaron en ' + nombre(rp) + ': así el generador está en corto. El rojo va en ' + nombre(a.vin) + ' y el negro en ' + nombre(a.gnd) + '.';
+      } else if (p.GP && rp !== a.vin) {
+        gen.error = true;
+        gen.pista = (rp === a.vout ? 'El rojo está en Vout. ' : rp === a.gnd ? 'El rojo está en el lado de tierra: el circuito quedaría al revés. ' : 'El rojo no toca el circuito. ') +
+                    'El generador entra por R₁‖C₁ (1 kΩ y 1 nF): el rojo va en ' + nombre(a.vin) + '.';
+      } else if (p.GN && rn !== a.gnd) {
+        gen.error = true;
+        gen.pista = 'El negro va en ' + nombre(a.gnd) + ', el lado libre de R₂‖C₂: es la tierra del circuito.' +
+                    (rn === a.vin || rn === a.vout ? ' Donde está ahora pone ' + (rn === a.vin ? 'Vin' : 'Vout') + ' en corto con tierra.' : '');
+      } else if (!p.GP || !p.GN) {
+        gen.pista = 'Toca los caimanes del generador en la bandeja: el rojo va en ' + nombre(a.vin) + ' (el lado libre de R₁‖C₁) y el negro en ' + nombre(a.gnd) + ' (el lado libre de R₂‖C₂).';
+      } else gen.ok = true;
+    }
+    a.lista.push(gen);
+    // Puntas: CH1 en la entrada y CH2 en la salida
+    [['P1', 'CH1', 'vin', 'Vin', 'donde entra el generador'], ['P2', 'CH2', 'vout', 'Vout', 'entre R₁‖C₁ y R₂‖C₂']].forEach(function (q) {
+      const item = { ok: false, texto: 'Punta de ' + q[1] + ' en ' + q[3], pista: falta };
+      if (listo) {
+        const r = red(q[0]), objetivo = a[q[2]];
+        if (!p[q[0]]) item.pista = 'Toca "Punta ' + q[1] + '" en la bandeja y engánchala en ' + nombre(objetivo) + ', ' + q[4] + '.';
+        else if (r !== objetivo) {
+          item.error = true;
+          const cambiada = q[2] === 'vin' ? (r === a.vout ? 'Está en Vout, pero CH1 mide la entrada. ' : '') : (r === a.vin ? 'Está en Vin, pero CH2 mide la salida. ' : '');
+          item.pista = cambiada + 'Va en ' + nombre(objetivo) + ', ' + q[4] + '.';
+        } else item.ok = true;
+      }
+      a.lista.push(item);
+    });
+    // Pinzas de tierra de las puntas
+    const tierras = { ok: false, texto: 'Tierras de CH1 y CH2 en la tierra del circuito', pista: falta };
+    if (listo) {
+      const mal = ['T1', 'T2'].filter(function (id) { return p[id] && red(id) !== a.gnd; })[0];
+      if (mal) {
+        const r = red(mal), cual = r === a.vin ? 'Vin' : r === a.vout ? 'Vout' : null, ch = mal === 'T1' ? 'CH1' : 'CH2';
+        tierras.error = true;
+        tierras.pista = cual
+          ? 'La tierra de ' + ch + ' está en ' + cual + '. Por dentro, las tierras de las puntas y la del generador están unidas: esa pinza pone ' + cual + ' en corto con tierra. Muévela a ' + nombre(a.gnd) + '.'
+          : 'La tierra de ' + ch + ' no toca la tierra del circuito: muévela a ' + nombre(a.gnd) + '.';
+      } else if (!p.T1 || !p.T2) tierras.pista = 'Pon las pinzas de tierra de CH1 y CH2 en ' + nombre(a.gnd) + ', con el negro del generador.';
+      else tierras.ok = true;
+    }
+    a.lista.push(tierras);
+    a.ok = a.lista.every(function (c) { return c.ok; });
+    return a;
+  }
+  // En los retos 2 a 7 el circuito tiene que seguir bien armado
+  function chequeoArmado() {
+    const a = revisarArmado(), falla = a.lista.filter(function (c) { return !c.ok; })[0];
+    return { ok: a.ok, error: !a.ok, texto: 'Circuito armado en la protoboard',
+             pista: falla ? 'Algo cambió en la protoboard: revisa «' + falla.texto + '» como en el reto 1.' : '' };
+  }
+
   const RETOS = [
+    {
+      titulo: 'Arma el circuito en la protoboard', nivel: 'Fácil', meta: 'R₁‖C₁ + R₂‖C₂',
+      texto: 'Arma en la protoboard el circuito del esquema: R₁ en paralelo con C₁, en serie con R₂ en paralelo con C₂. Después conecta el generador y las dos puntas del osciloscopio.',
+      pista: 'Los 5 huecos de cada columna están unidos por dentro. Dos piezas quedan en paralelo si comparten las mismas dos columnas, y en serie si comparten solo una: esa columna común es Vout. El riel − de abajo sirve como tierra.',
+      revisar: function () { return revisarArmado().lista; },
+      exito: function () {
+        const a = revisarArmado();
+        return 'Quedó armado: Vin en ' + a.nombre(a.vin) + ', Vout en ' + a.nombre(a.vout) + ' y la tierra en ' + a.nombre(a.gnd) + '. Ahora enciende el generador.';
+      }
+    },
     {
       titulo: 'Enciende el generador', nivel: 'Fácil', meta: 'senoidal · 24,6 kHz',
       texto: 'El generador alimenta el circuito. Ponlo a dar una onda senoidal de 24,6 kHz y enciende su salida.',
@@ -584,7 +1055,7 @@
         ];
       },
       exito: function () {
-        return 'El generador da una senoidal de 24,6 kHz. Mira el osciloscopio: si ves una franja en vez de ondas, es porque caben muchísimas; eso lo arreglas en el reto 3.';
+        return 'El generador da una senoidal de 24,6 kHz. Mira el osciloscopio: si ves una franja en vez de ondas, es porque caben muchísimas; eso lo arreglas en el reto 4.';
       }
     },
     {
@@ -613,7 +1084,7 @@
         if (c.sale) pistaAmpl = 'La onda amarilla se sale de la pantalla y la medición sale con ?: gira CH1 VOLTS/DIV hacia un valor más grande (+).';
         else pistaAmpl = 'Marca ' + voltios(c.pp) + (c.pp > 2.1 ? ': todavía es mucho. Gira AMPL del generador hacia abajo (−).' : ': falta. Gira AMPL del generador hacia arriba (+).');
         return [
-          { ok: genEn(24600) && puntasBien(), texto: 'Generador en 24,6 kHz y puntas en ×10', pista: 'Deja la mesa como quedó en los retos 1 y 2.' },
+          { ok: genEn(24600) && puntasBien(), texto: 'Generador en 24,6 kHz y puntas en ×10', pista: 'Deja la mesa como quedó en los retos 2 y 3.' },
           { ok: r.ciclos >= 1 && r.ciclos <= 5, texto: 'SEC/DIV: se ven entre 1 y 5 ondas',
             pista: r.ciclos > 5 ? 'Se ven demasiadas ondas: gira SEC/DIV hacia un valor más pequeño (−).' : 'No alcanza a verse una onda completa: gira SEC/DIV hacia un valor más grande (+).' },
           { ok: mesa.medir.ch1, texto: 'Medición CH1 Pk-Pk encendida', pista: 'Toca MEASURE y, en el menú de la derecha de la pantalla, enciende CH1 Pk-Pk.' },
@@ -730,11 +1201,19 @@
   const TOTAL = RETOS.length;
 
   // ---------- 13. Avance guardado ----------
-  function progresoInicial() { return { actual: 0, hechos: [], memo: {} }; }
+  function progresoInicial() { return { v: 2, actual: 0, hechos: [], memo: {} }; }
   let guiado = leer(CLAVE_RETOS);
   if (!guiado || !Array.isArray(guiado.hechos)) guiado = progresoInicial();
   if (!guiado.memo) guiado.memo = {};
   function guardarRetos() { escribir(CLAVE_RETOS, guiado); }
+  // Antes eran 6 retos: con la protoboard como reto 1, los que ya estaban corren un puesto
+  if (guiado.v !== 2) {
+    const memoNuevo = {};
+    Object.keys(guiado.memo).forEach(function (k) { memoNuevo[String(Number(k) + 1)] = guiado.memo[k]; });
+    guiado = { v: 2, actual: 0, memo: memoNuevo,
+               hechos: guiado.hechos.map(function (i) { return i + 1; }).filter(function (i) { return i < TOTAL; }) };
+    guardarRetos();
+  }
   function memo() {
     const k = String(guiado.actual);
     if (!guiado.memo[k]) guiado.memo[k] = {};
@@ -778,8 +1257,8 @@
     mostrarPuntos();
     if (guiado.actual >= TOTAL) {
       $('reto-num').textContent = TOTAL + ' de ' + TOTAL + ' retos';
-      $('reto-titulo').textContent = '¡Completaste los 6 retos del Lab 4!';
-      $('reto-texto').textContent = 'Ya sabes configurar el generador, poner las puntas en ×10, ajustar Vin con el osciloscopio, medir Vout y el desfase con los cursores, ' +
+      $('reto-titulo').textContent = '¡Completaste los ' + TOTAL + ' retos del Lab 4!';
+      $('reto-texto').textContent = 'Ya sabes armar el circuito en la protoboard, configurar el generador, poner las puntas en ×10, ajustar Vin con el osciloscopio, medir Vout y el desfase con los cursores, ' +
                                     'y cómo cambian con la frecuencia. ¡Listo para el laboratorio!';
       $('reto-check').innerHTML = '';
       $('reto-extra').innerHTML = '';
@@ -823,7 +1302,8 @@
   function revisarReto(r) {
     if (guiado.actual >= TOTAL) return;
     r = r || lecturas();
-    const reto = RETOS[guiado.actual], lista = reto.revisar(r), mem = memo();
+    const reto = RETOS[guiado.actual], mem = memo();
+    const lista = (guiado.actual > 0 ? [chequeoArmado()] : []).concat(reto.revisar(r));
     let yaMarcado = false;
     $('reto-check').innerHTML = lista.map(function (c) {
       let clase = 'si', icono = '✓', ayuda = '';
@@ -903,6 +1383,7 @@
     dibujarPantalla(r);
     dibujarMenu();
     pintarPuntas();
+    pintarProto();
     repintar.forEach(function (f) { f(); });
     revisarReto(r);
   }
@@ -912,22 +1393,26 @@
   }
   $('btn-vaciar').addEventListener('click', function () {
     mesa = mesaInicial();
+    sel = null;
+    mostrada = null;
+    aviso = '';
     cambio();
   });
 
   // Mesa como queda al terminar los primeros n retos (para el atajo ?reto=)
   function prepararHasta(n) {
     const m = mesaInicial();
-    if (n >= 1) Object.assign(m.gen, { forma: 'seno', rango: 3, dial: 246, salida: true, offset: 0 });
-    if (n >= 2) { m.puntas = { ch1: 10, ch2: 10 }; m.sonda = { ch1: 10, ch2: 10 }; }
-    if (n >= 3) {
+    if (n >= 1) m.proto = JSON.parse(JSON.stringify(ARMADO));
+    if (n >= 2) Object.assign(m.gen, { forma: 'seno', rango: 3, dial: 246, salida: true, offset: 0 });
+    if (n >= 3) { m.puntas = { ch1: 10, ch2: 10 }; m.sonda = { ch1: 10, ch2: 10 }; }
+    if (n >= 4) {
       m.gen.ampl = Math.round(2 / modulo(circuito(24600).carga) * 20);
       m.vdiv.ch1 = VDIV.indexOf(0.05);
       m.tdiv = TDIV.indexOf(1e-5);
       m.medir.ch1 = true;
     }
-    if (n >= 4) { m.vdiv.ch2 = VDIV.indexOf(0.02); m.medir.ch2 = true; }
-    if (n >= 5) {
+    if (n >= 5) { m.vdiv.ch2 = VDIV.indexOf(0.02); m.medir.ch2 = true; }
+    if (n >= 6) {
       m.tdiv = TDIV.indexOf(5e-6);
       m.cursor = { on: true, c1: 2, c2: Math.round((2 - angulo(circuito(24600).h) / (2 * Math.PI * 24600) / 5e-6) * 100) / 100, sel: 2 };
     }
@@ -943,7 +1428,7 @@
   }
   if (guiado.actual > TOTAL) guiado.actual = 0;
 
-  dibujarCircuito();
+  dibujarEsquema();
   mostrarReto();
   pintar();
 })();
